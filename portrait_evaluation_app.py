@@ -269,6 +269,38 @@ Criticism should only be applied to aspects where there is a clear and significa
 
 Use the word "however" only once , always write unique phrases!
 
+## CRITICAL: OBJECTIVE FIRST ITERATION ASSESSMENT
+
+When evaluating progress, you MUST objectively assess what the FIRST iteration actually was:
+
+### Recognizing Basic Sketches (First Iteration):
+A basic sketch typically has:
+- Visible construction/guide lines (cross lines on face, proportion markers)
+- Minimal detail in hair (simple lines vs. textured strands)
+- Schematic facial features (basic shapes vs. refined expressions)
+- No shading or minimal tonal work
+- Placeholder-style elements
+
+**If the first iteration is a basic sketch:**
+- first_score values should typically be in the 4-6 range, NOT 7-9
+- A rough sketch with construction lines is NOT "good proportions" (7-8) - it's "basic foundation" (4-5)
+- Simple hair lines are NOT "good attention to detail" (7-8) - they are "foundational work" (4-5)
+
+### Recognizing Dramatic Progress:
+If comparing a basic sketch (iteration 1) to a refined portrait (current iteration):
+- Use language like "DRAMATICALLY improved", "significant transformation", "remarkable progress"
+- Do NOT say "maintained" or "unchanged" when there's obvious visual transformation
+- Score differences should reflect the actual visual difference (e.g., from 5 to 8, not 8 to 8)
+
+### Progress Language Guide:
+| Visual Change | Correct Language | Score Change |
+|---------------|------------------|--------------|
+| Basic sketch → Refined work | "dramatically improved", "transformed" | +3 to +4 |
+| Noticeable improvement | "noticeably improved", "refined" | +1 to +2 |
+| Minor refinement | "slightly improved", "subtle refinement" | +1 |
+| No visible change | "maintained", "unchanged" | 0 |
+| Quality declined | "regressed", "declined" | -1 to -3 |
+
 ## COMPARISON ANALYSIS RULES:
 
 ### 1. Long-term Progress Analysis (First → Current):
@@ -313,10 +345,12 @@ Use the word "however" only once , always write unique phrases!
 - Avoid repeating criticism for issues that have been resolved
 
 ### 7. Progress Recognition:
-- Celebrate visible improvements, even small ones
+- **CELEBRATE DRAMATIC IMPROVEMENTS**: If a basic sketch transformed into a refined portrait, explicitly acknowledge this transformation
+- When progress is significant, use enthusiastic language: "remarkable transformation", "impressive growth", "substantial improvement"
 - Recognize effort and dedication to improvement
 - Motivate continued practice with specific next steps
-- But also be honest when effort did not result in improvement
+- Be honest when effort did not result in improvement
+- **IMPORTANT**: Do not downplay significant progress by using neutral language like "maintained" when dramatic change occurred
 
 ## ANALYSIS CRITERIA:
 Your analysis should include the following elements, each with detailed and comprehensive explanations:
@@ -454,6 +488,35 @@ Your answer should be purely JSON, without any additional explanation such as "`
         "feedback": "<Comprehensive and Detailed feedback>"
     }}
 }}
+
+## FINAL VERIFICATION CHECKLIST (Complete before submitting):
+
+Before finalizing your response, verify each of these points:
+
+1. **First Iteration Reality Check:**
+   - Look at the FIRST image again. Is it a basic sketch with construction lines?
+   - If YES: Are my first_score values in the 4-6 range? (NOT 7-9)
+   - Did I inflate first_score because I saw the later refined versions?
+
+2. **Progress Magnitude Check:**
+   - Is there a DRAMATIC visual difference between first and current iteration?
+   - If YES: Does my progress_summary use words like "dramatically improved", "transformed", "remarkable progress"?
+   - If YES: Are my score differences at least +2 to +4 points (not just +1)?
+
+3. **Language-Score Consistency:**
+   - For EACH category: Does my feedback text match my numerical score change?
+   - If I wrote "improved" → Did the score increase?
+   - If I wrote "maintained" → Is the score truly unchanged AND do the images look identical?
+   - If I wrote "declined" → Did the score decrease?
+
+4. **Avoid "Maintained" Trap:**
+   - Am I using "maintained" or "unchanged" when there's clearly visible improvement?
+   - If first iteration was a sketch and current is refined → I should NOT say "maintained good proportions"
+   - Instead say: "proportions have dramatically improved from the initial sketch"
+
+5. **Honest Assessment:**
+   - Would a human art instructor agree with my scores?
+   - Am I being fair to the student's actual progress?
 
 """
 
