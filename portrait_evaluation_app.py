@@ -140,10 +140,19 @@ Your analysis should include the following elements, each with detailed and comp
    - **Shadows and Highlights:** Are shadows and highlights used to create depth and dimension effectively?
 
 5. **Color Theory and Application**
-   - **Color Harmony:** Evaluate the harmony of the color palette. Do the colors work well together?
-   - **Skin Tones:** Are the skin tones realistic, reflecting variations due to light and shadow?
-   - **Temperature:** Is there an effective use of warm and cool tones to convey depth and mood?
-   - **IMPORTANT:** Include this section even for black-and-white images if user asks about colors in conversation history - provide color palette suggestions and theory advice
+   - **For Color Portraits:**
+     - **Color Harmony:** Evaluate the harmony of the color palette. Do the colors work well together?
+     - **Skin Tones:** Are the skin tones realistic, reflecting variations due to light and shadow?
+     - **Temperature:** Is there an effective use of warm and cool tones to convey depth and mood?
+   - **CRITICAL: Black-and-White Portraits as Valid Artistic Style:**
+     - Black-and-white (monochrome) portraits are a legitimate and respected artistic style, not an incomplete work
+     - Do NOT penalize black-and-white portraits for lacking color - evaluate them based on tonal values, contrast, and grayscale mastery
+     - For black-and-white portraits, evaluate:
+       * **Tonal Range:** How effectively does the portrait use the full range from pure white to deep black?
+       * **Contrast:** Is there appropriate contrast to create depth and visual interest?
+       * **Tonal Transitions:** Are the gradations between light and dark smooth and intentional?
+       * **Value Relationships:** How well do the values work together to create form and dimension?
+     - Black-and-white portraits can achieve scores of 7-10 if they demonstrate excellent tonal control, contrast, and value relationships
 
 6. **Brushwork and Technique**
    - **Brushstrokes:** Assess the control and intentionality of brushstrokes. Do they contribute to the texture and surface quality of the portrait?
@@ -373,9 +382,19 @@ Your analysis should include the following elements, each with detailed and comp
    - **Shadows and Highlights:** Are shadows and highlights used to create depth and dimension effectively?
 
 5. **Color Theory and Application**
-   - **Color Harmony:** Evaluate the harmony of the color palette. Do the colors work well together?
-   - **Skin Tones:** Are the skin tones realistic, reflecting variations due to light and shadow?
-   - **Temperature:** Is there an effective use of warm and cool tones to convey depth and mood?
+   - **For Color Portraits:**
+     - **Color Harmony:** Evaluate the harmony of the color palette. Do the colors work well together?
+     - **Skin Tones:** Are the skin tones realistic, reflecting variations due to light and shadow?
+     - **Temperature:** Is there an effective use of warm and cool tones to convey depth and mood?
+   - **CRITICAL: Black-and-White Portraits as Valid Artistic Style:**
+     - Black-and-white (monochrome) portraits are a legitimate and respected artistic style, not an incomplete work
+     - Do NOT penalize black-and-white portraits for lacking color - evaluate them based on tonal values, contrast, and grayscale mastery
+     - For black-and-white portraits, evaluate:
+       * **Tonal Range:** How effectively does the portrait use the full range from pure white to deep black?
+       * **Contrast:** Is there appropriate contrast to create depth and visual interest?
+       * **Tonal Transitions:** Are the gradations between light and dark smooth and intentional?
+       * **Value Relationships:** How well do the values work together to create form and dimension?
+     - Black-and-white portraits can achieve scores of 7-10 if they demonstrate excellent tonal control, contrast, and value relationships
 
 6. **Brushwork and Technique**
    - **Brushstrokes:** Assess the control and intentionality of brushstrokes. Do they contribute to the texture and surface quality of the portrait?
