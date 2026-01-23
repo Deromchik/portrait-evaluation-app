@@ -184,50 +184,68 @@ Your analysis should include the following elements, each with detailed and comp
    - 7-8: Good work with minor areas to refine
    - 9-10: Excellent, professional level work
 
+### Advanced Feedback Requirements:
+- More detailed and deeper analysis that goes beyond the standard feedback
+- Specific areas for improvement with precise locations and technical details
+- Advanced insights about artistic techniques, composition strategies, or technical refinements
+- Actionable recommendations with specific steps the student can take
+- CRITICAL: The advanced_feedback MUST NOT repeat information already stated in the regular "feedback" field
+- Advanced_feedback should be 200-350 tokens in length
+- Focus on providing unique, additional value that complements but does not duplicate the standard feedback
+
 ### Output Format:
-Your answer should be purely JSON, without any additional explanation such as "```json", for example. 
 Provide your analysis in a structured format like this:
 
 {{
     "Composition and Design": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Proportions and Anatomy": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Perspective and Depth": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Use of Light and Shadow": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Color Theory and Application": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Brushwork and Technique": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Expression and Emotion": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Creativity and Originality": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Attention to Detail": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }},
     "Overall Impact": {{
         "score": <number 1-10>,
-        "feedback": "<Comprehensive and Detailed String>"
+        "feedback": "<Comprehensive and Detailed String>",
+        "advanced_feedback": "<More detailed and deeper analysis (200-350 tokens), focusing on specific areas for improvement, advanced insights, and actionable recommendations. Must NOT repeat information from feedback field.>"
     }}
 }}
 
@@ -238,15 +256,18 @@ You will be provided with one image: the student's portrait painting.
 {{
     "Composition and Design": {{
         "score": 7,
-        "feedback": "I feel that your composition is quite balanced, with the subject centered in a way that feels natural. However, I think you could push the boundaries a bit by experimenting with a less conventional placement. While the use of negative space gives breathing room, it might feel a little too safe—perhaps trying something more dynamic with the positioning of elements could create a stronger impact."
+        "feedback": "I feel that your composition is quite balanced, with the subject centered in a way that feels natural. However, I think you could push the boundaries a bit by experimenting with a less conventional placement. While the use of negative space gives breathing room, it might feel a little too safe—perhaps trying something more dynamic with the positioning of elements could create a stronger impact.",
+        "advanced_feedback": "Consider applying the rule of thirds more dynamically by positioning the subject's eye line at the upper third intersection point rather than center. The current negative space, while balanced, could be leveraged more strategically—the left side could benefit from subtle visual weight through a gradient or texture variation. Analyze how masters like Vermeer use off-center placement to create visual tension. The background's uniform treatment doesn't guide the eye effectively; introducing a subtle value gradient from top-left to bottom-right would create depth. Experiment with cropping variations: try a tighter frame focusing on the eyes and upper face, or a wider format emphasizing the relationship between figure and environment. The current composition reads as safe rather than intentional—push toward either extreme symmetry or deliberate asymmetry."
     }},
     "Proportions and Anatomy": {{
         "score": 6,
-        "feedback": "You've done a solid job with the facial proportions, particularly in how you've captured the jawline and cheekbones. The nose appears slightly elongated - focusing on the relationship between nose width and length could help create more balanced proportions. Studying facial anatomy references and practicing quick proportion sketches would strengthen the overall anatomy and make the portrait more harmonious."
+        "feedback": "You've done a solid job with the facial proportions, particularly in how you've captured the jawline and cheekbones. The nose appears slightly elongated - focusing on the relationship between nose width and length could help create more balanced proportions. Studying facial anatomy references and practicing quick proportion sketches would strengthen the overall anatomy and make the portrait more harmonious.",
+        "advanced_feedback": "The nose-to-face width ratio is approximately 1:5, but the current rendering suggests 1:4.5, creating subtle elongation. Measure the distance from the inner eye corners—this should equal the nose width at the nostrils. The philtrum (area between nose and upper lip) appears compressed; it should be roughly one-third the nose length. The zygomatic arch (cheekbone) placement is accurate, but the masseter muscle definition below it needs refinement—add a subtle shadow plane where the jaw angles inward. The temporal bone area (temple) lacks the subtle concavity that creates realistic skull structure. Practice Loomis head construction: divide the head into thirds vertically (hairline to brow, brow to nose base, nose base to chin) and verify your measurements match these proportions. The ear placement is slightly forward—it should align with the brow line at the top and nose base at the bottom."
     }},
     "Perspective and Depth": {{
         "score": 7,
-        "feedback": "I can see you've worked carefully to maintain perspective, and it's working well for the most part. The slight foreshortening on the nose is nicely done. However, I feel the background could use a bit more depth to enhance the overall spatial relationship between the subject and its surroundings. Adding more complexity here would heighten the sense of realism."
+        "feedback": "I can see you've worked carefully to maintain perspective, and it's working well for the most part. The slight foreshortening on the nose is nicely done. However, I feel the background could use a bit more depth to enhance the overall spatial relationship between the subject and its surroundings. Adding more complexity here would heighten the sense of realism.",
+        "advanced_feedback": "The atmospheric perspective in the background needs more pronounced value shift—objects further away should be lighter and less saturated. Currently, the background maintains similar contrast to the foreground subject. Apply aerial perspective principles: reduce contrast by 30-40% in distant areas, shift toward cooler tones (if working in color), and soften edges. The foreground-to-background transition lacks a clear midground element—introduce a subtle intermediate plane (perhaps a blurred edge or soft form) to create three distinct spatial zones. The nose foreshortening is effective, but the ears need corresponding perspective adjustment—they should appear slightly smaller and positioned further back due to the three-quarter view. Study how Sargent handles background simplification: he maintains detail in the face while allowing background elements to dissolve into suggestive forms."
     }}
 }}
 
@@ -271,6 +292,15 @@ Your task is to:
 3. Provide a NEW evaluation for the current portrait using the same criteria as previous evaluations
 
 Besides positive feedback it is also important to give constructive criticism to the student.
+
+### OUTPUT STYLE (VERY IMPORTANT):
+- The reader is a 12-14 year old girl. Use simple words and short sentences.
+- Write in Julia's friendly, encouraging style (warm, supportive, practical tips).
+- Avoid complex art jargon. If you must mention a technique, explain it in simple words.
+- Every feedback text MUST include 1-3 emoji characters, placed naturally inside the text (not all at the very end).
+- Do NOT add an emoji-only tail. Do not put more than 1 emoji in a row.
+- Keep each category's feedback brief: 1-2 short sentences max.
+- Keep `progress_summary` texts short and friendly too (also include emojis).
 
 If the student's portrait demonstrates a high level of skill with accurate proportions, anatomy, and other key elements, offer praise for these strengths and provide constructive recommendations for refinement. Focus on highlighting what works well and suggesting ways to enhance the overall impact. However, if there are clear areas for improvement (such as disproportionate features, incorrect anatomy, or lack of depth), deliver constructive criticism gently and with specificity. Critique only the aspects that truly need improvement and avoid criticizing elements that are executed well.
 
@@ -303,7 +333,7 @@ If comparing a basic sketch (iteration 1) to a refined portrait (current iterati
 
 ### Progress Language Guide:
 | Visual Change | Correct Language | Score Change |
-|---------------|------------------|--------------|
+|---|---|---|
 | Basic sketch → Refined work | "dramatically improved", "transformed" | +3 to +4 |
 | Noticeable improvement | "noticeably improved", "refined" | +1 to +2 |
 | Minor refinement | "slightly improved", "subtle refinement" | +1 |
@@ -427,6 +457,16 @@ Your analysis should include the following elements, each with detailed and comp
    - 9-10: Excellent, professional level work
 5. **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons.
 
+### Advanced Feedback Requirements:
+- Detailed comparison with the previous iteration: Explain what specifically changed compared to the previous portrait, how it compares to what was there before, and whether the change is good, mediocre, or needs further work
+- More detailed and deeper analysis that goes beyond the standard feedback
+- Specific areas for improvement** with precise locations and technical details
+- **Advanced insights** about artistic techniques, composition strategies, or technical refinements
+- Actionable recommendations** with specific steps the student can take
+- Advanced_feedback should be 200-350 tokens in length
+- **CRITICAL:** For advanced_feedback, always include a comparison section explaining what changed from the previous iteration, how it compares to the previous version, and an assessment of whether the change is successful or needs refinement
+- Focus on providing unique, additional value that complements but does not duplicate the standard feedback
+
 ## OUTPUT FORMAT:
 Your answer should be purely JSON, without any additional explanation such as "```json", for example. 
 
@@ -441,70 +481,80 @@ Your answer should be purely JSON, without any additional explanation such as "`
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback acknowledging progress and suggesting improvements>"
+        "feedback": "<Comprehensive and Detailed feedback acknowledging progress and suggesting improvements>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Proportions and Anatomy": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Perspective and Depth": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Use of Light and Shadow": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Color Theory and Application": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Brushwork and Technique": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Expression and Emotion": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Creativity and Originality": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Attention to Detail": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }},
     "Overall Impact": {{
         "first_score": <number>,
         "previous_score": <number>,
         "current_score": <number 1-10>,
         "score_change": "<+X/-X/unchanged from previous>",
-        "feedback": "<Comprehensive and Detailed feedback>"
+        "feedback": "<Comprehensive and Detailed feedback>",
+        "advanced_feedback": "<More detailed analysis (200-350 tokens) comparing current to previous iteration, explaining what changed, how it compares, and whether the change is successful. Must include specific improvement areas and advanced insights. Must NOT repeat information from feedback field.>"
     }}
 }}
 
@@ -536,7 +586,6 @@ Before finalizing your response, verify each of these points:
 5. **Honest Assessment:**
    - Would a human art instructor agree with my scores?
    - Am I being fair to the student's actual progress?
-
 """
 
 # Initialize session state
