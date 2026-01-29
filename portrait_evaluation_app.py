@@ -1169,7 +1169,7 @@ with col_main:
                         user_content = build_standalone_content(
                             image_base64)
                         system_prompt = EVALUATE_PORTRAIT_STANDALONE
-                        model = "gpt-5.2"
+                        model = "gpt-4o"
 
                     # First API call - get initial evaluation
                     response_text, usage = call_openai_api(
