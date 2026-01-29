@@ -735,10 +735,19 @@ def call_openai_api(api_key, system_prompt, user_content, model="gpt-4o"):
         "Content-Type": "application/json"
     }
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_content}
-    ]
+    # Handle user_content - can be string, list (for vision), or list with text
+    if isinstance(user_content, list):
+        # For vision API or structured content
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content}
+        ]
+    else:
+        # For simple text content
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content}
+        ]
 
     data = {
         "model": model,
@@ -1153,14 +1162,14 @@ with col_main:
                         system_prompt = COMPARISON_PROMPT.format(
                             output_language=st.session_state.output_language
                         )
-                        model = "openai/gpt-4o-2024-08-06"
+                        model = "gpt-4o"
                     else:
                         # First evaluation
                         st.info("🎨 First portrait evaluation")
                         user_content = build_standalone_content(
                             image_base64)
                         system_prompt = EVALUATE_PORTRAIT_STANDALONE
-                        model = "openai/gpt-5.2"
+                        model = "gpt-5.2"
 
                     # First API call - get initial evaluation
                     response_text, usage = call_openai_api(
@@ -1190,15 +1199,14 @@ with col_main:
                         julia_prompt = get_julia_style_prompt(
                             parsed_response, st.session_state.output_language
                         )
-                        julia_user_content = [
-                            {"type": "text", "text": julia_prompt}
-                        ]
+                        # For text-only API calls, pass string directly
+                        julia_user_content = julia_prompt
 
                         julia_response_text, julia_usage = call_openai_api(
                             API_KEY,
                             "You are a helpful assistant that converts art evaluation feedback into a friendly, child-appropriate style.",
                             julia_user_content,
-                            model="openai/gpt-4o-mini"
+                            model="gpt-4o-mini"
                         )
 
                         # Parse Julia style response
