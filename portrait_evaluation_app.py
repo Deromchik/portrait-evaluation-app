@@ -601,6 +601,8 @@ Before finalizing your response, verify each of these points:
    - Does my advanced_feedback contain any information that repeats what's already in the feedback field?
    - Have I ensured zero overlap between feedback and advanced_feedback content?
    - Is advanced_feedback providing completely new insights or different perspectives?
+
+**OUTPUT LANGUAGE:** All feedback text, progress_summary, and advanced_feedback must be written in {output_language}.
 """
 
 # Initialize session state
@@ -609,6 +611,9 @@ if "iterations" not in st.session_state:
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+if "output_language" not in st.session_state:
+    st.session_state.output_language = "English"
 
 
 # API key from Streamlit secrets
@@ -956,6 +961,29 @@ with st.sidebar:
 col_main, col_history = st.columns([2, 1])
 
 with col_main:
+    st.header("⚙️ Settings")
+
+    # Language selector
+    language_options = {
+        "English": "English",
+        "Ukrainian": "Ukrainian",
+        "Russian": "Russian",
+        "Spanish": "Spanish",
+        "French": "French",
+        "German": "German"
+    }
+
+    selected_language = st.selectbox(
+        "Output Language",
+        options=list(language_options.keys()),
+        index=list(language_options.keys()).index(
+            st.session_state.output_language) if st.session_state.output_language in language_options else 0,
+        help="Select the language for evaluation feedback"
+    )
+    st.session_state.output_language = selected_language
+
+    st.divider()
+
     st.header("📤 Upload Portrait")
 
     uploaded_file = st.file_uploader(
@@ -994,7 +1022,9 @@ with col_main:
                             st.session_state.iterations)
                         user_content = build_comparison_content(
                             comparison_data)
-                        system_prompt = COMPARISON_PROMPT
+                        system_prompt = COMPARISON_PROMPT.format(
+                            output_language=st.session_state.output_language
+                        )
                     else:
                         # First evaluation
                         st.info("🎨 First portrait evaluation")
