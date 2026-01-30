@@ -643,12 +643,14 @@ def get_comparison_data(iterations):
 
 
 def call_openai_api(api_key, system_prompt, user_content):
-    """Call OpenAI API"""
-    url = "https://api.openai.com/v1/chat/completions"
+    """Call OpenAI API (via OpenRouter)"""
+    url = "https://openrouter.ai/api/v1/chat/completions"
 
     headers = {
         "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:8501",  # Client URL
+        "X-Title": "Portrait Evaluation Assistant"  # Client title
     }
 
     messages = [
@@ -657,7 +659,7 @@ def call_openai_api(api_key, system_prompt, user_content):
     ]
 
     data = {
-        "model": "gpt-4o",
+        "model": "openai/gpt-4o",
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 6000
