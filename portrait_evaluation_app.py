@@ -178,13 +178,24 @@ Your analysis should include the following elements, each with detailed and comp
 1. Provide clear, constructive feedback, highlighting both strengths and areas for improvement.
 2. Avoid overly technical language; aim to be accessible and encouraging.
 3. Reference specific aspects of the painting to support your evaluation.
-4. **CRITICAL:** For each category, provide a numerical score from 1.0-10.0 (use one decimal place, e.g., 5.7, 8.2, 5.9) where:
+4. **CRITICAL SCORING RULES:** For each category, provide a numerical score from 1.0-10.0 (use one decimal place) where:
    - 1.0-3.9: Significant improvement needed
    - 4.0-6.9: Basic level, noticeable areas for improvement
    - 7.0-8.9: Good work with minor areas to refine
    - 9.0-10.0: Excellent, professional level work
-5. **DECIMAL VARIETY:** Scores should NOT always be integers (e.g., 7.0) or end in .5 (e.g., 7.5). Use the full range of decimals (e.g., 5.7, 8.2, 6.3) to provide precise evaluation.
-6. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
+   
+   **IMPORTANT:** These scores will be converted to percentages later. Therefore, you MUST provide diverse decimal scores with maximum variety. 
+   
+   **STRICTLY FORBIDDEN:** You are CATEGORICALLY PROHIBITED from using:
+   - Integer scores ending in .0 (e.g., 7.0, 5.0, 8.0, 4.0, 9.0, 6.0)
+   - Scores ending in .5 (e.g., 4.5, 7.5, 8.5, 5.5, 6.5, 9.5)
+   
+   **REQUIRED:** You MUST use varied decimal endings such as: .1, .2, .3, .4, .6, .7, .8, .9
+   - Good examples: 5.7, 8.2, 6.3, 7.8, 4.6, 9.1, 3.4, 6.9
+   - Bad examples (FORBIDDEN): 7.0, 5.0, 4.5, 7.5, 8.0, 6.5
+   
+   Each score must reflect precise evaluation with maximum decimal variety across all categories.
+5. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
 
 ### Advanced Feedback Requirements:
 - More detailed and deeper analysis that goes beyond the standard feedback
@@ -279,6 +290,7 @@ You will be provided with one image: the student's portrait painting.
 - **CONVERSATION INTEGRATION:** Always address specific user requests or concerns mentioned in conversation history within the relevant sections.
 - **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons since this agent evaluates standalone portraits.
 - **OUTPUT LANGUAGE:** All feedback text must be written in {output_language}.
+
 """
 
 COMPARISON_PROMPT = """
@@ -454,16 +466,27 @@ Your analysis should include the following elements, each with detailed and comp
 1. Provide clear, constructive feedback, highlighting both strengths and areas for improvement.
 2. Avoid overly technical language; aim to be accessible and encouraging.
 3. Reference specific aspects of the painting to support your evaluation.
-4. **CRITICAL:** For each category, provide a numerical score from 1.0-10.0 (use one decimal place, e.g., 5.7, 8.2, 5.9) where:
+4. **CRITICAL SCORING RULES:** For each category, provide a numerical score from 1.0-10.0 (use one decimal place) where:
    - 1.0-3.9: Significant improvement needed
    - 4.0-6.9: Basic level, noticeable areas for improvement
    - 7.0-8.9: Good work with minor areas to refine
    - 9.0-10.0: Excellent, professional level work
-5. **DECIMAL VARIETY:** Scores should NOT always be integers (e.g., 7.0) or end in .5 (e.g., 7.5). Use the full range of decimals (e.g., 5.7, 8.2, 6.3) to provide precise evaluation.
-6. **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons.
-7. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
-8. **AVOID REPETITION:** Analyze previous feedback. Do NOT repeat the same (or similar) introductory and concluding phrases in `advanced_feedback` and `feedback`.
-9. **UNCHANGED PARAMETERS:** Pay close attention to parameters that have not changed in the image; do NOT change the score for these parameters.
+   
+   **IMPORTANT:** These scores will be converted to percentages later. Therefore, you MUST provide diverse decimal scores with maximum variety. 
+   
+   **STRICTLY FORBIDDEN:** You are CATEGORICALLY PROHIBITED from using:
+   - Integer scores ending in .0 (e.g., 7.0, 5.0, 8.0, 4.0, 9.0, 6.0)
+   - Scores ending in .5 (e.g., 4.5, 7.5, 8.5, 5.5, 6.5, 9.5)
+   
+   **REQUIRED:** You MUST use varied decimal endings such as: .1, .2, .3, .4, .6, .7, .8, .9
+   - Good examples: 5.7, 8.2, 6.3, 7.8, 4.6, 9.1, 3.4, 6.9
+   - Bad examples (FORBIDDEN): 7.0, 5.0, 4.5, 7.5, 8.0, 6.5
+   
+   Each score must reflect precise evaluation with maximum decimal variety across all categories.
+5. **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons.
+6. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
+7. **AVOID REPETITION:** Analyze previous feedback. Do NOT repeat the same (or similar) introductory and concluding phrases in `advanced_feedback` and `feedback`.
+8. **UNCHANGED PARAMETERS:** Pay close attention to parameters that have not changed in the image; do NOT change the score for these parameters.
 
 ### Advanced Feedback Requirements:
 - **CRITICAL LANGUAGE REQUIREMENT:** Advanced_feedback MUST be written in simple words suitable for a 12-14 year old girl. Use the same simple, accessible language as the regular feedback field. Avoid complex art terminology, technical jargon, or sophisticated vocabulary. If you must mention a technique, explain it in simple, everyday words that a child would understand.
