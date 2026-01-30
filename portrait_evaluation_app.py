@@ -654,7 +654,9 @@ def call_openai_api(api_key, system_prompt, user_content):
     }
 
     messages = [
-        {"role": "system", "content": system_prompt},
+        {"role": "system", "content": [
+            {"type": "text", "text": system_prompt}
+        ]},
         {"role": "user", "content": user_content}
     ]
 
