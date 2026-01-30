@@ -605,90 +605,6 @@ Before finalizing your response, verify each of these points:
 **OUTPUT LANGUAGE:** All feedback text, progress_summary, and advanced_feedback must be written in {output_language}.
 """
 
-
-def get_julia_style_prompt(ai_response, output_language):
-    """Builds Julia style prompt with AI response"""
-    return f"""### Task:
-You will receive a JSON object in this variable:
-
-{json.dumps(ai_response, ensure_ascii=False)}
-
-Your task:
-1. Convert each "feedback" text into a SHORT, friendly "brief_feedback" line in Julia's communication style.
-2. Convert each "advanced_feedback" text into a friendly "simple_advanced_feedback" WITHOUT RESIZING in Julia's communication style.
-
-IMPORTANT AUDIENCE RULES:
-- The reader is a 12-14 year old girl. Use very simple words and short sentences.
-- Avoid complex art terms and jargon. If you must mention a technique, explain it in simple words.
-- The brief_feedback MUST include 1-3 emoji characters, placed naturally inside the text (not all at the very end).
-- Do NOT add an emoji-only tail like " ... <three emojis>".
-- Spread them: put 1 emoji near the compliment and (if you use a second) near the tip, as part of the sentence.
-- Do not put more than 1 emoji in a row.
-- You are FORBIDDEN from using phrases like "What do you think about such experiments?", "This could be very interesting!" at the end of statements.
-
-OUTPUT RULES:
-- For each category, output an object with TWO fields: "brief_feedback" and "simple_advanced_feedback".
-- Keep the SAME category keys and same order.
-- Do NOT add or remove categories.
-- Do NOT add new facts that were not in the input.
-- Output ONLY the final JSON. No explanations and no code fences.
-
-OUTPUT FORMAT:
-{{
-    "Composition and Design": {{
-        "brief_feedback": "<SHORT friendly feedback with 1-3 emojis>",
-        "simple_advanced_feedback": "<Detailed feedback in simple words, 200-350 tokens>"
-    }},
-    "Proportions and Anatomy": {{
-        "brief_feedback": "<SHORT friendly feedback with 1-3 emojis>",
-        "simple_advanced_feedback": "<Detailed feedback in simple words, 200-350 tokens>"
-    }},
-    ... (continue for all categories)
-}}
-
-ADVANCED_FEEDBACK RULES (CRITICAL):
-- The "advanced_feedback" field MUST NEVER repeat any information, phrases, or concepts already stated in the "feedback" field
-- Advanced_feedback must be 200-350 tokens in length - maintain this length when converting to Julia's style
-- Advanced_feedback should provide completely new insights, different examples, or alternative perspectives that complement but do not duplicate the feedback
-- **"Chew" complex terminology and explain everything in simple words a 12-14 year old would understand.**
-
-SIMPLE_ADVANCED_FEEDBACK RULES (CRITICAL):
-- The "simple_advanced_feedback" field MUST NEVER repeat any information, phrases, or concepts already stated in the "brief_feedback" field
-- simple_advanced_feedback must be 200-350 tokens in length - maintain this length when converting to Julia's style
-- simple_advanced_feedback should provide completely new insights, different examples, or alternative perspectives that complement but do not duplicate the brief_feedback
-- **"Chew" complex terminology and explain everything in simple words a 12-14 year old would understand.**
-- **FORMATTING (CRITICAL):** The simple_advanced_feedback MUST use markdown or HTML formatting with line breaks for readability:
-  - Use `<br>` or `\n` to separate paragraphs and key points
-  - Break text into short, digestible chunks (2-3 sentences each)
-  - Use bullet points or numbered lists where appropriate (e.g., `- point 1<br>- point 2`)
-  - Do NOT output one long unbroken block of text
-- **EMOJI REQUIREMENT:** Include 2-4 emojis naturally throughout simple_advanced_feedback text (not just at the end)
-- **LANGUAGE STYLE:** Use very simple words and short sentences suitable for a 12-14 year old girl
-
-Julia's style:
-- Use friendly, encouraging tone with phrases like "looks pretty", "wow that's amazing", "you did so well", "well done"
-- Start suggestions with gentle phrases like "maybe you could" or "what would you think about" instead of direct commands
-- Use "I think" instead of casual expressions like "but hey"
-- Avoid overly formal or pompous language - keep it conversational and accessible
-- Don't use slang terms like "amp up" - stick to more natural expressions
-- Prefer "which gives it a super polished look" over shorter, less enthusiastic phrasing
-- Avoid starting sentences with -ing forms like "paying closer" - use "maybe you could pay attention to" instead
-- Be less demanding in tone - soften direct statements with "maybe you could" at the beginning
-- Focus on practical, actionable advice rather than abstract concepts
-- Respect individual differences (like natural facial asymmetry) rather than treating them as flaws
-- Give specific technical suggestions (highlight placement, color layering, shading techniques)
-- Keep feedback concise - avoid unnecessary elaboration or "empty talk"
-- Consider the artist's intent (like realism goals) when giving suggestions about creative elements
-- Provide constructive criticism while maintaining an encouraging, supportive approach
-- Use simple, direct language rather than overly sophisticated vocabulary
-- Balance positive reinforcement with specific improvement suggestions
-
-Now, write the feedback JSON in Julia's style and return only the updated JSON.
-**Important: Language of all output values must be in:**
-{output_language}
-"""
-
-
 # Initialize session state
 if "iterations" not in st.session_state:
     st.session_state.iterations = []
@@ -726,7 +642,7 @@ def get_comparison_data(iterations):
         return {"first": iterations[0], "previous": iterations[n-2], "current": iterations[n-1]}
 
 
-def call_openai_api(api_key, system_prompt, user_content, model="gpt-4o"):
+def call_openai_api(api_key, system_prompt, user_content):
     """Call OpenAI API"""
     url = "https://api.openai.com/v1/chat/completions"
 
@@ -735,22 +651,13 @@ def call_openai_api(api_key, system_prompt, user_content, model="gpt-4o"):
         "Content-Type": "application/json"
     }
 
-    # Handle user_content - can be string, list (for vision), or list with text
-    if isinstance(user_content, list):
-        # For vision API or structured content
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content}
-        ]
-    else:
-        # For simple text content
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content}
-        ]
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_content}
+    ]
 
     data = {
-        "model": model,
+        "model": "gpt-4o",
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 6000
@@ -849,32 +756,6 @@ def extract_standard_evaluation(parsed_response, is_comparison=False):
                 }
 
     return standard_eval if standard_eval else None
-
-
-def extract_julia_style_evaluation(parsed_response, original_evaluation):
-    """Extracts Julia style evaluation format from response and merges with scores from original"""
-    if not parsed_response or not original_evaluation:
-        return None
-
-    categories = [
-        "Composition and Design", "Proportions and Anatomy", "Perspective and Depth",
-        "Use of Light and Shadow", "Color Theory and Application", "Brushwork and Technique",
-        "Expression and Emotion", "Creativity and Originality", "Attention to Detail", "Overall Impact"
-    ]
-
-    julia_eval = {}
-
-    for category in categories:
-        if category in parsed_response and category in original_evaluation:
-            cat_data = parsed_response[category]
-            original_data = original_evaluation[category]
-            julia_eval[category] = {
-                "score": original_data.get("score", 0),
-                "brief_feedback": cat_data.get("brief_feedback", ""),
-                "simple_advanced_feedback": cat_data.get("simple_advanced_feedback", "")
-            }
-
-    return julia_eval if julia_eval else None
 
 
 def calculate_average_score(evaluation):
@@ -976,7 +857,7 @@ def get_full_logs(iterations):
     return logs
 
 
-def display_evaluation(evaluation, is_comparison=False, parsed_response=None, raw_response=None, is_julia_style=False):
+def display_evaluation(evaluation, is_comparison=False, parsed_response=None, raw_response=None):
     """Displays evaluation"""
     if not evaluation:
         st.warning("Could not parse evaluation")
@@ -1016,25 +897,7 @@ def display_evaluation(evaluation, is_comparison=False, parsed_response=None, ra
                 with st.expander(f"**{category}** - {score}/10", expanded=False):
                     st.markdown(
                         f"<span class='score-badge {score_class}'>{score}/10</span>", unsafe_allow_html=True)
-
-                    if is_julia_style:
-                        # Display Julia style feedback
-                        brief_feedback = data.get("brief_feedback", "")
-                        simple_advanced_feedback = data.get(
-                            "simple_advanced_feedback", "")
-
-                        st.markdown("**Brief Feedback:**")
-                        st.write(brief_feedback)
-
-                        if simple_advanced_feedback:
-                            st.markdown("**Advanced Feedback:**")
-                            # Replace <br> with actual line breaks for display
-                            formatted_advanced = simple_advanced_feedback.replace(
-                                '<br>', '\n').replace('\\n', '\n')
-                            st.markdown(formatted_advanced)
-                    else:
-                        # Display standard feedback
-                        st.write(data.get("feedback", ""))
+                    st.write(data.get("feedback", ""))
 
     # Show raw JSON option
     if raw_response:
@@ -1162,21 +1025,18 @@ with col_main:
                         system_prompt = COMPARISON_PROMPT.format(
                             output_language=st.session_state.output_language
                         )
-                        model = "gpt-4o"
                     else:
                         # First evaluation
                         st.info("🎨 First portrait evaluation")
                         user_content = build_standalone_content(
                             image_base64)
                         system_prompt = EVALUATE_PORTRAIT_STANDALONE
-                        model = "gpt-4o"
 
-                    # First API call - get initial evaluation
+                    # API call
                     response_text, usage = call_openai_api(
                         API_KEY,
                         system_prompt,
-                        user_content,
-                        model=model
+                        user_content
                     )
 
                     # Parse response
@@ -1185,59 +1045,10 @@ with col_main:
                     standard_eval = extract_standard_evaluation(
                         parsed_response, is_comparison)
 
-                    # Save original evaluation
-                    st.session_state.iterations[-1]["original_evaluation"] = standard_eval
-                    st.session_state.iterations[-1]["original_raw_response"] = response_text
-                    st.session_state.iterations[-1]["original_parsed_response"] = parsed_response
-
-                    # Second API call - convert to Julia style
-                    julia_eval = None
-                    julia_parsed_response = None
-                    julia_response_text = None
-
-                    if standard_eval:
-                        julia_prompt = get_julia_style_prompt(
-                            parsed_response, st.session_state.output_language
-                        )
-                        # For text-only API calls, pass string directly
-                        julia_user_content = julia_prompt
-
-                        julia_response_text, julia_usage = call_openai_api(
-                            API_KEY,
-                            "You are a helpful assistant that converts art evaluation feedback into a friendly, child-appropriate style.",
-                            julia_user_content,
-                            model="gpt-4o-mini"
-                        )
-
-                        # Parse Julia style response
-                        julia_parsed_response = parse_evaluation_response(
-                            julia_response_text, False)
-                        julia_eval = extract_julia_style_evaluation(
-                            julia_parsed_response, standard_eval)
-
-                        # Save Julia style evaluation (this is what we display)
-                        st.session_state.iterations[-1]["evaluation"] = julia_eval
-                        st.session_state.iterations[-1]["raw_response"] = julia_response_text
-                        # Keep original parsed_response for progress_summary in comparison mode
-                        if is_comparison and parsed_response and "progress_summary" in parsed_response:
-                            # Merge progress_summary into julia_parsed_response
-                            if julia_parsed_response:
-                                julia_parsed_response["progress_summary"] = parsed_response["progress_summary"]
-                        st.session_state.iterations[-1]["parsed_response"] = julia_parsed_response if julia_parsed_response else parsed_response
-                        st.session_state.iterations[-1]["julia_raw_response"] = julia_response_text
-
-                        # Combine usage
-                        total_usage = {
-                            "total_tokens": usage.get("total_tokens", 0) + julia_usage.get("total_tokens", 0),
-                            "prompt_tokens": usage.get("prompt_tokens", 0) + julia_usage.get("prompt_tokens", 0),
-                            "completion_tokens": usage.get("completion_tokens", 0) + julia_usage.get("completion_tokens", 0)
-                        }
-                        usage = total_usage
-                    else:
-                        # Fallback if parsing failed
-                        st.session_state.iterations[-1]["evaluation"] = standard_eval
-                        st.session_state.iterations[-1]["raw_response"] = response_text
-                        st.session_state.iterations[-1]["parsed_response"] = parsed_response
+                    # Save evaluation
+                    st.session_state.iterations[-1]["evaluation"] = standard_eval
+                    st.session_state.iterations[-1]["raw_response"] = response_text
+                    st.session_state.iterations[-1]["parsed_response"] = parsed_response
 
                     # Add to chat history
                     st.session_state.chat_history.append({
@@ -1247,27 +1058,21 @@ with col_main:
                     })
                     st.session_state.chat_history.append({
                         "role": "assistant",
-                        "content": julia_response_text if julia_response_text else response_text,
-                        "evaluation": julia_eval if julia_eval else standard_eval,
+                        "content": response_text,
+                        "evaluation": standard_eval,
                         "is_comparison": is_comparison,
-                        "parsed_response": julia_parsed_response if julia_parsed_response else parsed_response
+                        "parsed_response": parsed_response
                     })
 
                     st.success(
                         f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')}")
 
-                    # Display result - use Julia style if available
+                    # Display result
                     st.divider()
                     st.subheader(
                         f"📝 Evaluation Result (Iteration {len(st.session_state.iterations)})")
-
                     display_evaluation(
-                        julia_eval if julia_eval else standard_eval,
-                        is_comparison,
-                        julia_parsed_response if julia_parsed_response else parsed_response,
-                        julia_response_text if julia_response_text else response_text,
-                        is_julia_style=(julia_eval is not None)
-                    )
+                        standard_eval, is_comparison, parsed_response, response_text)
 
                 except requests.exceptions.RequestException as e:
                     st.session_state.iterations.pop()  # Remove failed iteration
