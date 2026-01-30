@@ -801,10 +801,6 @@ def get_full_logs(iterations):
     logs = {
         "export_timestamp": datetime.now().isoformat(),
         "total_iterations": len(iterations),
-        "prompts": {
-            "EVALUATE_PORTRAIT_STANDALONE": EVALUATE_PORTRAIT_STANDALONE,
-            "COMPARISON_PROMPT": COMPARISON_PROMPT
-        },
         "iterations": []
     }
 
@@ -837,16 +833,23 @@ def get_full_logs(iterations):
                 "image_name": iteration.get("image_name", "Unknown")
             }
 
+        # Get actual system_prompt that was sent to API (with substituted variables)
+        actual_system_prompt = iteration.get("system_prompt")
+        if not actual_system_prompt:
+            # Fallback to template name if not saved
+            actual_system_prompt = "COMPARISON_PROMPT" if is_comparison else "EVALUATE_PORTRAIT_STANDALONE"
+
         iteration_log = {
             "iteration_number": i + 1,
             "timestamp": iteration.get("timestamp", "N/A"),
             "image_name": iteration.get("image_name", "Unknown"),
             "mode": "comparison" if is_comparison else "standalone",
             "api_input": {
-                "model": "gpt-4o",
+                "model": "openai/gpt-4o",
                 "temperature": 0.1,
                 "max_tokens": 6000,
-                "system_prompt": "COMPARISON_PROMPT" if is_comparison else "EVALUATE_PORTRAIT_STANDALONE",
+                # Use actual prompt with substituted variables
+                "system_prompt": actual_system_prompt,
                 "user_content": user_content_log
             },
             "api_output": {
@@ -1053,6 +1056,8 @@ with col_main:
                     st.session_state.iterations[-1]["evaluation"] = standard_eval
                     st.session_state.iterations[-1]["raw_response"] = response_text
                     st.session_state.iterations[-1]["parsed_response"] = parsed_response
+                    # Save actual prompt with substituted variables
+                    st.session_state.iterations[-1]["system_prompt"] = system_prompt
 
                     # Add to chat history
                     st.session_state.chat_history.append({
