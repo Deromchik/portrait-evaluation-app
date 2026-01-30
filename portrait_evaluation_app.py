@@ -183,6 +183,8 @@ Your analysis should include the following elements, each with detailed and comp
    - 4.0-6.9: Basic level, noticeable areas for improvement
    - 7.0-8.9: Good work with minor areas to refine
    - 9.0-10.0: Excellent, professional level work
+5. **DECIMAL VARIETY:** Scores should NOT always be integers (e.g., 7.0) or end in .5 (e.g., 7.5). Use the full range of decimals (e.g., 5.7, 8.2, 6.3) to provide precise evaluation.
+6. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
 
 ### Advanced Feedback Requirements:
 - More detailed and deeper analysis that goes beyond the standard feedback
@@ -457,10 +459,11 @@ Your analysis should include the following elements, each with detailed and comp
    - 4.0-6.9: Basic level, noticeable areas for improvement
    - 7.0-8.9: Good work with minor areas to refine
    - 9.0-10.0: Excellent, professional level work
-5. **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons.
-6. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
-7. **AVOID REPETITION:** Analyze previous feedback. Do NOT repeat the same (or similar) introductory and concluding phrases in `advanced_feedback` and `feedback`.
-8. **UNCHANGED PARAMETERS:** Pay close attention to parameters that have not changed in the image; do NOT change the score for these parameters.
+5. **DECIMAL VARIETY:** Scores should NOT always be integers (e.g., 7.0) or end in .5 (e.g., 7.5). Use the full range of decimals (e.g., 5.7, 8.2, 6.3) to provide precise evaluation.
+6. **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons.
+7. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
+8. **AVOID REPETITION:** Analyze previous feedback. Do NOT repeat the same (or similar) introductory and concluding phrases in `advanced_feedback` and `feedback`.
+9. **UNCHANGED PARAMETERS:** Pay close attention to parameters that have not changed in the image; do NOT change the score for these parameters.
 
 ### Advanced Feedback Requirements:
 - **CRITICAL LANGUAGE REQUIREMENT:** Advanced_feedback MUST be written in simple words suitable for a 12-14 year old girl. Use the same simple, accessible language as the regular feedback field. Avoid complex art terminology, technical jargon, or sophisticated vocabulary. If you must mention a technique, explain it in simple, everyday words that a child would understand.
