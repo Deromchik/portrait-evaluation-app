@@ -93,6 +93,7 @@ Besides positive feedback it is also important to give constructive criticism to
 If the student's portrait demonstrates a high level of skill with accurate proportions, anatomy, and other key elements, offer praise for these strengths and provide constructive recommendations for refinement. Focus on highlighting what works well and suggesting ways to enhance the overall impact. However, if there are clear areas for improvement (such as disproportionate features, incorrect anatomy, or lack of depth), deliver constructive criticism gently and with specificity. Critique only the aspects that truly need improvement and avoid criticizing elements that are executed well.
 
 ### DYNAMIC REFERENCE SECTION:
+{reference_context}
 
 ### CONVERSATION CONTEXT INTEGRATION:
 If conversation history is provided, you MUST actively incorporate the user's specific requests, concerns, or focus areas into your analysis. For each relevant section, address the user's questions directly:
@@ -171,8 +172,38 @@ Your analysis should include the following elements, each with detailed and comp
    - **Completeness:** Is the portrait carefully finished, or are there areas that seem incomplete or rushed?
 
 10. **Overall Impact**
-   - **Emotional Response:** What emotional response does the portrait evoke in the viewer?
-   - **Cohesiveness:** Do all the elements work together to create a strong and unified work?
+    - **Emotional Response:** What emotional response does the portrait evoke in the viewer?
+    - **Cohesiveness:** Do all the elements work together to create a strong and unified work?
+
+### SCORING BENCHMARKS:
+
+**REFERENCE PORTRAIT 10/10 (EXCELLENT STANDARD):**
+The ideal reference for a perfect 10/10 score is Leonardo da Vinci's "Mona Lisa" - a masterpiece that exemplifies exceptional artistic achievement. A portrait that would receive a score of 10/10 represents exceptional artistic achievement for a student, approaching the level of mastery demonstrated in works like the Mona Lisa. This is a portrait that demonstrates:
+- **Composition and Design:** Thoughtfully arranged composition with intentional use of negative space, clear focal point on the face, and balanced visual weight. The composition guides the viewer's eye naturally and creates visual harmony.
+- **Proportions and Anatomy:** Accurate facial proportions following standard measurements (eyes positioned at mid-face, nose width equals distance between inner eye corners, proper facial thirds). Clear understanding of underlying bone structure (cheekbones, jawline, forehead) and muscle placement (masseter, orbicularis oculi).
+- **Perspective and Depth:** Convincing sense of three-dimensionality with consistent perspective. Effective use of foreshortening when applicable (e.g., in three-quarter views). Clear distinction between foreground (face) and background.
+- **Use of Light and Shadow:** Well-defined, consistent light source creating realistic chiaroscuro. Smooth transitions between light and shadow areas. Highlights on high points (nose bridge, cheekbones, forehead) and shadows in recessed areas (eye sockets, under nose, under chin). Creates convincing volume and form.
+- **Color Theory and Application:** For color portraits: harmonious color palette with realistic skin tones that reflect light variations. Effective use of warm and cool tones to create depth. For black-and-white: full tonal range from pure white to deep black with smooth gradations and appropriate contrast.
+- **Brushwork and Technique:** Controlled, intentional brushstrokes that contribute to texture and form. Varied stroke direction and pressure. Surface quality that looks polished both up close and from a distance.
+- **Expression and Emotion:** Captures a specific, convincing mood or emotion. The expression feels natural and authentic, conveying personality and character.
+- **Creativity and Originality:** Shows personal artistic style while maintaining technical excellence. May include creative compositional choices or unique color interpretations that enhance rather than distract.
+- **Attention to Detail:** Carefully rendered details such as skin texture, hair strands, reflections in eyes, subtle variations in skin tone. The portrait appears complete and finished throughout.
+- **Overall Impact:** Creates a strong emotional connection with the viewer. All elements work together cohesively to create a unified, impactful work of art.
+
+**REFERENCE PORTRAIT 0/10 (MINIMUM BASELINE):**
+A portrait that would receive a score of 0/10 represents the absolute minimum baseline - work that shows only the most basic attempt at creating a portrait, with fundamental issues across all areas:
+- **Composition and Design:** No clear compositional intent. Subject may be placed randomly on the page. No consideration of negative space or visual balance. No clear focal point.
+- **Proportions and Anatomy:** Severe proportional errors (eyes too high/low, nose too large/small, features misaligned). No understanding of basic facial structure. Features may appear disconnected or floating.
+- **Perspective and Depth:** No sense of depth or three-dimensionality. Portrait appears completely flat. No understanding of perspective or foreshortening.
+- **Use of Light and Shadow:** No clear light source or completely inconsistent lighting. No shadows or highlights, or shadows placed randomly without logic. Portrait appears flat with no volume.
+- **Color Theory and Application:** For color portraits: unrealistic or garish colors, no understanding of skin tones, colors applied without consideration of light. For black-and-white: no tonal variation, only one or two values used, no contrast.
+- **Brushwork and Technique:** Uncontrolled, random brushstrokes with no intentionality. No variation in technique. Surface appears messy or unfinished.
+- **Expression and Emotion:** No clear expression or emotion conveyed. Features appear blank or expressionless. No sense of personality or character.
+- **Creativity and Originality:** No personal style evident. Work appears purely mechanical or copied without understanding.
+- **Attention to Detail:** No details rendered. Features are simplified to basic shapes with no texture, variation, or refinement. Work appears incomplete or rushed.
+- **Overall Impact:** Fails to create any emotional response. Elements do not work together. Portrait lacks cohesion and appears disjointed.
+
+**IMPORTANT:** Use these benchmarks as reference points when scoring. A portrait scoring 10/10 should demonstrate exceptional skill for a student aged 12+, approaching professional quality. A portrait scoring 0/10 represents the absolute minimum - work that shows only the most basic attempt with fundamental issues. Most student work will fall between these extremes. Adjust your scores accordingly, ensuring that scores reflect the actual quality level relative to these benchmarks.
 
 ### Important Rules:
 1. Provide clear, constructive feedback, highlighting both strengths and areas for improvement.
@@ -290,7 +321,6 @@ You will be provided with one image: the student's portrait painting.
 - **CONVERSATION INTEGRATION:** Always address specific user requests or concerns mentioned in conversation history within the relevant sections.
 - **NO TEACHER REFERENCES:** Never mention teacher, teacher's reference, or teacher comparisons since this agent evaluates standalone portraits.
 - **OUTPUT LANGUAGE:** All feedback text must be written in {output_language}.
-
 """
 
 COMPARISON_PROMPT = """
@@ -691,7 +721,7 @@ def call_openai_api(api_key, system_prompt, user_content):
     ]
 
     data = {
-        "model": "openai/gpt-4o",
+        "model": "openai/gpt-5.2",
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 6000
@@ -875,7 +905,7 @@ def get_full_logs(iterations):
             "image_name": iteration.get("image_name", "Unknown"),
             "mode": "comparison" if is_comparison else "standalone",
             "api_input": {
-                "model": "openai/gpt-4o",
+                "model": "openai/gpt-5.2",
                 "temperature": 0.1,
                 "max_tokens": 6000,
                 # Use actual prompt with substituted variables
