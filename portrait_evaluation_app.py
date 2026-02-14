@@ -721,7 +721,7 @@ def call_openai_api(api_key, system_prompt, user_content):
     ]
 
     data = {
-        "model": "openai/gpt-5.2",
+        "model": "openai/gpt-4o",
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 6000
@@ -905,7 +905,7 @@ def get_full_logs(iterations):
             "image_name": iteration.get("image_name", "Unknown"),
             "mode": "comparison" if is_comparison else "standalone",
             "api_input": {
-                "model": "openai/gpt-5.2",
+                "model": "openai/gpt-4o",
                 "temperature": 0.1,
                 "max_tokens": 6000,
                 # Use actual prompt with substituted variables
