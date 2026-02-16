@@ -675,6 +675,12 @@ if "chat_history" not in st.session_state:
 if "output_language" not in st.session_state:
     st.session_state.output_language = "English"
 
+if "standalone_model" not in st.session_state:
+    st.session_state.standalone_model = "openai/gpt-5.2"
+
+if "comparison_model" not in st.session_state:
+    st.session_state.comparison_model = "openai/gpt-5.2"
+
 
 # API key from Streamlit secrets
 API_KEY = st.secrets["OPENAI_API_KEY"]
@@ -702,7 +708,7 @@ def get_comparison_data(iterations):
         return {"first": iterations[0], "previous": iterations[n-2], "current": iterations[n-1]}
 
 
-def call_openai_api(api_key, system_prompt, user_content):
+def call_openai_api(api_key, system_prompt, user_content, model="openai/gpt-5.2"):
     """Call OpenAI API (via OpenRouter)"""
     url = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -721,11 +727,15 @@ def call_openai_api(api_key, system_prompt, user_content):
     ]
 
     data = {
-        "model": "openai/gpt-4o",
+        "model": model,
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 6000
     }
+
+    # Add reasoning_effort for openai/gpt-5.2 to enable temperature parameter
+    if model == "openai/gpt-5.2":
+        data["reasoning_effort"] = "none"
 
     response = requests.post(url, headers=headers, json=data)
     response.raise_for_status()
@@ -899,15 +909,19 @@ def get_full_logs(iterations):
             # Fallback to template name if not saved
             actual_system_prompt = "COMPARISON_PROMPT" if is_comparison else "EVALUATE_PORTRAIT_STANDALONE"
 
+        # Get model used for this iteration
+        model_used = iteration.get("model", "openai/gpt-5.2")
+        
         iteration_log = {
             "iteration_number": i + 1,
             "timestamp": iteration.get("timestamp", "N/A"),
             "image_name": iteration.get("image_name", "Unknown"),
             "mode": "comparison" if is_comparison else "standalone",
             "api_input": {
-                "model": "openai/gpt-4o",
+                "model": model_used,
                 "temperature": 0.1,
                 "max_tokens": 6000,
+                "reasoning_effort": "none" if model_used == "openai/gpt-5.2" else None,
                 # Use actual prompt with substituted variables
                 "system_prompt": actual_system_prompt,
                 "user_content": user_content_log
@@ -1030,6 +1044,39 @@ col_main, col_history = st.columns([2, 1])
 with col_main:
     st.header("⚙️ Settings")
 
+    # Model selection for each prompt type
+    model_options = [
+        "openai/gpt-5.2",
+        "openai/gpt-4o",
+        "openai/gpt-4-turbo",
+        "anthropic/claude-3.5-sonnet",
+        "anthropic/claude-3-opus",
+        "google/gemini-pro-1.5",
+        "meta-llama/llama-3.1-405b-instruct"
+    ]
+
+    col_model1, col_model2 = st.columns(2)
+    
+    with col_model1:
+        selected_standalone_model = st.selectbox(
+            "Model for Standalone Evaluation",
+            options=model_options,
+            index=model_options.index(st.session_state.standalone_model) if st.session_state.standalone_model in model_options else 0,
+            help="Select the model for first portrait evaluation"
+        )
+        st.session_state.standalone_model = selected_standalone_model
+    
+    with col_model2:
+        selected_comparison_model = st.selectbox(
+            "Model for Comparison Evaluation",
+            options=model_options,
+            index=model_options.index(st.session_state.comparison_model) if st.session_state.comparison_model in model_options else 0,
+            help="Select the model for comparison evaluations"
+        )
+        st.session_state.comparison_model = selected_comparison_model
+
+    st.divider()
+
     # Language selector
     language_options = {
         "English": "English",
@@ -1092,18 +1139,23 @@ with col_main:
                         system_prompt = COMPARISON_PROMPT.format(
                             output_language=st.session_state.output_language
                         )
+                        selected_model = st.session_state.comparison_model
                     else:
                         # First evaluation
                         st.info("🎨 First portrait evaluation")
                         user_content = build_standalone_content(
                             image_base64)
-                        system_prompt = EVALUATE_PORTRAIT_STANDALONE
+                        system_prompt = EVALUATE_PORTRAIT_STANDALONE.format(
+                            output_language=st.session_state.output_language
+                        )
+                        selected_model = st.session_state.standalone_model
 
                     # API call
                     response_text, usage = call_openai_api(
                         API_KEY,
                         system_prompt,
-                        user_content
+                        user_content,
+                        model=selected_model
                     )
 
                     # Parse response
@@ -1118,6 +1170,8 @@ with col_main:
                     st.session_state.iterations[-1]["parsed_response"] = parsed_response
                     # Save actual prompt with substituted variables
                     st.session_state.iterations[-1]["system_prompt"] = system_prompt
+                    # Save model used
+                    st.session_state.iterations[-1]["model"] = selected_model
 
                     # Add to chat history
                     st.session_state.chat_history.append({
