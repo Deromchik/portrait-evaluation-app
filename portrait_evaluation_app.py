@@ -1146,6 +1146,7 @@ with col_main:
                         user_content = build_standalone_content(
                             image_base64)
                         system_prompt = EVALUATE_PORTRAIT_STANDALONE.format(
+                            reference_context="",  # Empty by default, can be customized if needed
                             output_language=st.session_state.output_language
                         )
                         selected_model = st.session_state.standalone_model
