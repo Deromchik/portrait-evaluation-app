@@ -1126,8 +1126,10 @@ def display_julia_feedback(julia_response, show_header=True):
         with cols[i % 2]:
             with st.expander(f"**{category}**", expanded=False):
                 if brief:
-                    st.markdown(f"**Brief:** {brief}")
+                    st.markdown("**brief_feedback:**")
+                    st.markdown(brief)
                 if simple_adv:
+                    st.markdown("**simple_advanced_feedback:**")
                     st.markdown(simple_adv, unsafe_allow_html=True)
 
 
