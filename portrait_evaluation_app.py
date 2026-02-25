@@ -665,6 +665,89 @@ Before finalizing your response, verify each of these points:
 **OUTPUT LANGUAGE:** All feedback text, progress_summary, and advanced_feedback must be written in {output_language}.
 """
 
+JULIA_STYLE_PROMPT = """
+Task:
+You will receive a JSON object in this variable:
+
+{input_data}
+
+Your task:
+1. Convert each "feedback" text into a SHORT, friendly "brief_feedback" line in Julia's communication style.
+2. Convert each "advanced_feedback" text into a friendly "simple_advanced_feedback" WITHOUT RESIZING in Julia's communication style.
+
+IMPORTANT AUDIENCE RULES:
+- The reader is a 12-14 year old girl. Use very simple words and short sentences.
+- Avoid complex art terms and jargon. If you must mention a technique, explain it in simple words.
+- The brief_feedback MUST include 1-3 emoji characters, placed naturally inside the text (not all at the very end).
+- Do NOT add an emoji-only tail like " ... <three emojis>".
+- Spread them: put 1 emoji near the compliment and (if you use a second) near the tip, as part of the sentence.
+- Do not put more than 1 emoji in a row.
+- You are FORBIDDEN from using phrases like "What do you think about such experiments?", "This could be very interesting!" at the end of statements.
+
+OUTPUT RULES:
+- For each category, output an object with TWO fields: "brief_feedback" and "simple_advanced_feedback".
+- Keep the SAME category keys and same order.
+- Do NOT add or remove categories.
+- Do NOT add new facts that were not in the input.
+- Output ONLY the final JSON. No explanations and no code fences.
+
+OUTPUT FORMAT:
+{{
+    "Composition and Design": {{
+        "brief_feedback": "<SHORT friendly feedback with 1-3 emojis>",
+        "simple_advanced_feedback": "<Detailed feedback in simple words, 200-350 tokens>"
+    }},
+    "Proportions and Anatomy": {{
+        "brief_feedback": "<SHORT friendly feedback with 1-3 emojis>",
+        "simple_advanced_feedback": "<Detailed feedback in simple words, 200-350 tokens>"
+    }},
+    ... (continue for all categories)
+}}
+
+
+SIMPLE_ADVANCED_FEEDBACK RULES (CRITICAL):
+- **simple_advanced_feedback is created based on advanced_feedback from the provided data. Always add comments from advanced_feedback at the beginning of simple_advanced_feedback about the current state of the portrait, such as "You've significantly improved the level of detail in your portrait, especially in the hair and facial features", "You've refined the anatomy, especially around the jawline and ear, which makes the portrait look more realistic", and so on.**
+- simple_advanced_feedback must be 200-350 tokens in length - maintain this length when converting to Julia's style
+- simple_advanced_feedback should provide completely new insights, different examples, or alternative perspectives that complement but do not duplicate the feedback
+- **"Chew" complex terminology and explain everything in simple words a 12-14 year old would understand.**
+- The "simple_advanced_feedback" field MUST NEVER repeat any information, phrases, or concepts already stated in the "brief_feedback" field
+- simple_advanced_feedback must be 200-350 tokens in length - maintain this length when converting to Julia's style
+- simple_advanced_feedback should provide completely new ideas, different examples, or alternative perspectives that complement but do not duplicate brief_feedback while referring to specific parts of the portrait (e.g., "left eye," "shading on the nose," "background on the right side").
+- **"Chew" complex terminology and explain everything in simple words a 12-14 year old would understand.**
+- **FORMATTING (CRITICAL):** The simple_advanced_feedback MUST use markdown or HTML formatting with line breaks for readability:
+  - Use `<br>` to separate paragraphs and key points
+  - Break text into short, digestible chunks (2-3 sentences each)
+  - Use bullet points or numbered lists where appropriate (e.g., `- point 1<br>- point 2`)
+  - Do NOT output one long unbroken block of text
+  - Don't make big double indents, only single ones
+  - Always use the `<br>` character for separation
+- **EMOJI REQUIREMENT:** Include 2-4 emojis naturally throughout simple_advanced_feedback text (not just at the end)
+- **LANGUAGE STYLE:** Use very simple words and short sentences suitable for a 12-14 year old girl
+
+
+Julia's style:
+- Use friendly, encouraging tone with phrases like "looks pretty", "wow that's amazing", "you did so well", "well done"
+- Start suggestions with gentle phrases like "maybe you could" or "what would you think about" instead of direct commands
+- Use "I think" instead of casual expressions like "but hey"
+- Avoid overly formal or pompous language - keep it conversational and accessible
+- Don't use slang terms like "amp up" - stick to more natural expressions
+- Prefer "which gives it a super polished look" over shorter, less enthusiastic phrasing
+- Avoid starting sentences with -ing forms like "paying closer" - use "maybe you could pay attention to" instead
+- Be less demanding in tone - soften direct statements with "maybe you could" at the beginning
+- Focus on practical, actionable advice rather than abstract concepts
+- Respect individual differences (like natural facial asymmetry) rather than treating them as flaws
+- Give specific technical suggestions (highlight placement, color layering, shading techniques)
+- Keep feedback concise - avoid unnecessary elaboration or "empty talk"
+- Consider the artist's intent (like realism goals) when giving suggestions about creative elements
+- Provide constructive criticism while maintaining an encouraging, supportive approach
+- Use simple, direct language rather than overly sophisticated vocabulary
+- Balance positive reinforcement with specific improvement suggestions
+
+Now, write the feedback JSON in Julia's style and return only the updated JSON.
+**Important: Language of all output values must be in:**
+{output_language}
+"""
+
 # Initialize session state
 if "iterations" not in st.session_state:
     st.session_state.iterations = []
@@ -680,6 +763,9 @@ if "standalone_model" not in st.session_state:
 
 if "comparison_model" not in st.session_state:
     st.session_state.comparison_model = "openai/gpt-5.2"
+
+if "julia_model" not in st.session_state:
+    st.session_state.julia_model = "openai/gpt-5.2"
 
 
 # API key from Streamlit secrets
@@ -850,6 +936,37 @@ def get_score_class(score):
     return "score-low"
 
 
+def build_julia_input_data(parsed_response):
+    """Build input data for Julia style prompt from parsed evaluation response.
+    Extracts only categories that have feedback and advanced_feedback."""
+    if not parsed_response:
+        return None
+    categories_input = {}
+    for k, v in parsed_response.items():
+        if k == "progress_summary":
+            continue
+        if isinstance(v, dict) and "feedback" in v and "advanced_feedback" in v:
+            categories_input[k] = {
+                "feedback": v.get("feedback", ""),
+                "advanced_feedback": v.get("advanced_feedback", "")
+            }
+    return categories_input if categories_input else None
+
+
+def call_julia_style_api(api_key, parsed_response, output_language, model="openai/gpt-5.2"):
+    """Calls API to convert evaluation feedback to Julia's style."""
+    input_data = build_julia_input_data(parsed_response)
+    if not input_data:
+        return None, {}
+    input_json = json.dumps(input_data, indent=2, ensure_ascii=False)
+    system_prompt = JULIA_STYLE_PROMPT.format(
+        input_data=input_json,
+        output_language=output_language
+    )
+    user_content = f"Convert this evaluation to Julia's style:\n\n{input_json}"
+    return call_openai_api(api_key, system_prompt, user_content, model=model)
+
+
 def get_export_data(iterations):
     """Prepares data for export (without images)"""
     export_list = []
@@ -860,7 +977,8 @@ def get_export_data(iterations):
             "timestamp": iteration.get("timestamp", "N/A"),
             "evaluation": iteration.get("evaluation"),
             "parsed_response": iteration.get("parsed_response"),
-            "raw_response": iteration.get("raw_response")
+            "raw_response": iteration.get("raw_response"),
+            "julia_response": iteration.get("julia_response")
         }
         export_list.append(export_item)
     return export_list
@@ -986,6 +1104,33 @@ def display_evaluation(evaluation, is_comparison=False, parsed_response=None, ra
             st.code(raw_response, language="json")
 
 
+def display_julia_feedback(julia_response, show_header=True):
+    """Displays Julia style feedback in a separate block."""
+    if not julia_response:
+        return
+    parsed = parse_evaluation_response(julia_response)
+    if not parsed:
+        st.warning("Could not parse Julia style feedback")
+        return
+    if show_header:
+        st.markdown("### ✨ Julia's Style Feedback")
+        st.caption("Friendly feedback adapted for a 12-14 year old audience")
+    cols = st.columns(2)
+    for i, (category, data) in enumerate(parsed.items()):
+        if not isinstance(data, dict):
+            continue
+        brief = data.get("brief_feedback", "")
+        simple_adv = data.get("simple_advanced_feedback", "")
+        if not brief and not simple_adv:
+            continue
+        with cols[i % 2]:
+            with st.expander(f"**{category}**", expanded=False):
+                if brief:
+                    st.markdown(f"**Brief:** {brief}")
+                if simple_adv:
+                    st.markdown(simple_adv, unsafe_allow_html=True)
+
+
 # === MAIN INTERFACE ===
 
 st.markdown("<h1 class='main-title'>🎨 Portrait Evaluation Assistant</h1>",
@@ -1055,7 +1200,7 @@ with col_main:
         "meta-llama/llama-3.1-405b-instruct"
     ]
 
-    col_model1, col_model2 = st.columns(2)
+    col_model1, col_model2, col_model3 = st.columns(3)
     
     with col_model1:
         selected_standalone_model = st.selectbox(
@@ -1074,6 +1219,15 @@ with col_main:
             help="Select the model for comparison evaluations"
         )
         st.session_state.comparison_model = selected_comparison_model
+
+    with col_model3:
+        selected_julia_model = st.selectbox(
+            "Model for Julia Style",
+            options=model_options,
+            index=model_options.index(st.session_state.julia_model) if st.session_state.julia_model in model_options else 0,
+            help="Select the model for Julia-style feedback conversion"
+        )
+        st.session_state.julia_model = selected_julia_model
 
     st.divider()
 
@@ -1191,12 +1345,32 @@ with col_main:
                     st.success(
                         f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')}")
 
+                    # Julia style conversion (always runs on evaluation result)
+                    julia_response = None
+                    if parsed_response and build_julia_input_data(parsed_response):
+                        with st.spinner("Converting to Julia's style..."):
+                            try:
+                                julia_response, _ = call_julia_style_api(
+                                    API_KEY,
+                                    parsed_response,
+                                    st.session_state.output_language,
+                                    model=st.session_state.julia_model
+                                )
+                                st.session_state.iterations[-1]["julia_response"] = julia_response
+                            except Exception as julia_err:
+                                st.warning(f"Julia style conversion skipped: {julia_err}")
+
                     # Display result
                     st.divider()
                     st.subheader(
                         f"📝 Evaluation Result (Iteration {len(st.session_state.iterations)})")
                     display_evaluation(
                         standard_eval, is_comparison, parsed_response, response_text)
+
+                    # Display Julia style feedback in separate block
+                    if julia_response:
+                        st.divider()
+                        display_julia_feedback(julia_response)
 
                 except requests.exceptions.RequestException as e:
                     st.session_state.iterations.pop()  # Remove failed iteration
@@ -1223,6 +1397,11 @@ with col_history:
                     for cat, data in iteration["evaluation"].items():
                         if isinstance(data, dict) and "score" in data:
                             st.write(f"• {cat}: **{data['score']}**/10")
+
+                # Julia style feedback for each iteration
+                if iteration.get("julia_response"):
+                    with st.expander("✨ Julia's Style Feedback", expanded=False):
+                        display_julia_feedback(iteration.get("julia_response"), show_header=False)
 
                 # Raw JSON view button for each iteration
                 if iteration.get("raw_response"):
