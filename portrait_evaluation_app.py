@@ -829,7 +829,7 @@ def get_comparison_data(iterations):
         return {"first": iterations[0], "previous": iterations[n-2], "current": iterations[n-1]}
 
 
-def call_openai_api(api_key, system_prompt, user_content, model="openai/gpt-5.2"):
+def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt-5.2"):
     """Call OpenAI API (via OpenRouter)"""
     url = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -841,11 +841,17 @@ def call_openai_api(api_key, system_prompt, user_content, model="openai/gpt-5.2"
     }
 
     messages = [
-        {"role": "system", "content": [
-            {"type": "text", "text": system_prompt}
-        ]},
-        {"role": "user", "content": user_content}
+        {
+            "role": "system",
+            "content": [
+                {"type": "text", "text": system_prompt}
+            ],
+        }
     ]
+
+    # Optionally add user message (not used for Julia-style prompt where everything is in system)
+    if user_content is not None:
+        messages.append({"role": "user", "content": user_content})
 
     data = {
         "model": model,
@@ -989,10 +995,15 @@ def build_julia_input_data(parsed_response):
 
 
 def call_julia_style_api(api_key, parsed_response, output_language, skill_level="beginner", model="openai/gpt-5.2"):
-    """Calls API to convert evaluation feedback to Julia's style."""
+    """Calls API to convert evaluation feedback to Julia's style.
+
+    Returns:
+        tuple: (response_text, usage, system_prompt) or (None, {}, None) if no input data.
+    """
     input_data = build_julia_input_data(parsed_response)
     if not input_data:
-        return None, {}
+        return None, {}, None
+
     input_json = json.dumps(input_data, indent=2, ensure_ascii=False)
     audience_complexity = JULIA_LEVEL_CONTENT.get(skill_level, JULIA_LEVEL_BEGINNER)
     system_prompt = JULIA_STYLE_PROMPT.format(
@@ -1000,8 +1011,15 @@ def call_julia_style_api(api_key, parsed_response, output_language, skill_level=
         audience_complexity=audience_complexity,
         output_language=output_language
     )
-    user_content = f"Convert this evaluation to Julia's style:\n\n{input_json}"
-    return call_openai_api(api_key, system_prompt, user_content, model=model)
+    # For JULIA_STYLE_PROMPT everything (instructions + data) is in the system message.
+    # No separate user message is sent.
+    response_text, usage = call_openai_api(
+        api_key,
+        system_prompt,
+        user_content=None,
+        model=model,
+    )
+    return response_text, usage, system_prompt
 
 
 def get_export_data(iterations):
@@ -1082,6 +1100,12 @@ def get_full_logs(iterations):
                 "system_prompt": actual_system_prompt,
                 "user_content": user_content_log
             },
+            # Julia-style API call info (if available)
+            "julia_api_input": {
+                "model": iteration.get("julia_model"),
+                "system_prompt": iteration.get("julia_system_prompt"),
+                "skill_level": iteration.get("julia_skill_level"),
+            } if iteration.get("julia_system_prompt") else None,
             "api_output": {
                 "raw_response": iteration.get("raw_response"),
                 "parsed_response": iteration.get("parsed_response"),
@@ -1400,7 +1424,7 @@ with col_main:
                     if parsed_response and build_julia_input_data(parsed_response):
                         with st.spinner("Converting to Julia's style..."):
                             try:
-                                julia_response, _ = call_julia_style_api(
+                                julia_response, julia_usage, julia_system_prompt = call_julia_style_api(
                                     API_KEY,
                                     parsed_response,
                                     st.session_state.output_language,
@@ -1409,6 +1433,8 @@ with col_main:
                                 )
                                 st.session_state.iterations[-1]["julia_response"] = julia_response
                                 st.session_state.iterations[-1]["julia_skill_level"] = st.session_state.julia_skill_level
+                                st.session_state.iterations[-1]["julia_system_prompt"] = julia_system_prompt
+                                st.session_state.iterations[-1]["julia_model"] = st.session_state.julia_model
                             except Exception as julia_err:
                                 st.warning(f"Julia style conversion skipped: {julia_err}")
 
