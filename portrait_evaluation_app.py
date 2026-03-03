@@ -1194,6 +1194,11 @@ def display_julia_feedback(julia_response, show_header=True):
                     st.markdown("**simple_advanced_feedback:**")
                     st.markdown(simple_adv, unsafe_allow_html=True)
 
+    # Full response in a code block so user can copy it entirely (Streamlit code block has copy button)
+    with st.expander("📋 Copy full Julia response", expanded=False):
+        st.caption("Use the copy icon on the top-right of the code block to copy the entire response.")
+        st.code(julia_response, language="json")
+
 
 # === MAIN INTERFACE ===
 
