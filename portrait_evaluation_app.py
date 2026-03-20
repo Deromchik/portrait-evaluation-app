@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import base64
 import requests
+import time
 from pathlib import Path
 from datetime import datetime
 
@@ -126,14 +127,14 @@ You were provided with an image from a painting student. Your task was to analyz
 This was your output:
 {input_data}
 
-Your task is to write a message in english explaining that this censored content is not allowed. Maximum amount of characters is 300.
+Your task is to write a message in {output_language} explaining that this censored content is not allowed. Maximum amount of characters is 300.
 """
 AGENT3_NOT_PORTRAIT_MESSAGE = """### Task:
 You were provided with an image from a painting student. Your task was to analyze the image and classify its contents. Based on your analysis, you have found that the image does not contain a portrait.
 This was your output:
 {input_data}
 
-Your task is to write a message in english explaining that at the moment you only provide painting lessons for portraits. Maximum amount of characters is 300.
+Your task is to write a message in {output_language} explaining that at the moment you only provide painting lessons for portraits. Maximum amount of characters is 300.
 """
 
 # Prompts - Main evaluation
@@ -773,15 +774,15 @@ def call_agent1_initial_analysis(api_key, image_base64, model="openai/gpt-4o-min
     return call_openai_api(api_key, AGENT1_INITIAL_ANALYSIS, user_content, model=model)
 
 
-def call_agent2_censored_message(api_key, agent1_output_json, model="openai/gpt-4o-mini"):
+def call_agent2_censored_message(api_key, agent1_output_json, output_language="English", model="openai/gpt-4o-mini"):
     """Agent2: Generates censored content rejection message. Text-only input."""
-    prompt = AGENT2_CENSORED_MESSAGE.format(input_data=agent1_output_json)
+    prompt = AGENT2_CENSORED_MESSAGE.format(input_data=agent1_output_json, output_language=output_language)
     return call_openai_api(api_key, prompt, user_content="Generate the rejection message.", model=model)
 
 
-def call_agent3_not_portrait_message(api_key, agent1_output_json, model="openai/gpt-4o-mini"):
+def call_agent3_not_portrait_message(api_key, agent1_output_json, output_language="English", model="openai/gpt-4o-mini"):
     """Agent3: Generates not-portrait rejection message. Text-only input."""
-    prompt = AGENT3_NOT_PORTRAIT_MESSAGE.format(input_data=agent1_output_json)
+    prompt = AGENT3_NOT_PORTRAIT_MESSAGE.format(input_data=agent1_output_json, output_language=output_language)
     return call_openai_api(api_key, prompt, user_content="Generate the rejection message.", model=model)
 
 
@@ -1218,6 +1219,7 @@ with col_main:
                  use_container_width=True)
 
         if st.button("🚀 Get Evaluation", type="primary"):
+            time_start = time.perf_counter()
             with st.spinner("Analyzing portrait..."):
                 try:
                     iteration_added = False
@@ -1238,19 +1240,25 @@ with col_main:
                         if agent1_data.get("CENCORED_CONTENT") is True:
                             agent2_text, _ = call_agent2_censored_message(
                                 API_KEY, json.dumps(agent1_data, indent=2),
+                                output_language=st.session_state.output_language,
                                 model=st.session_state.prefilter_model
                             )
                             st.error(agent2_text or "This content is not allowed.")
                             prefilter_passed = False
+                            elapsed = time.perf_counter() - time_start
+                            st.caption(f"⏱️ Total time: {elapsed:.1f}s")
 
                         # Agent3: Not a portrait → reject
                         elif agent1_data.get("IS_PORTRAIT") is False:
                             agent3_text, _ = call_agent3_not_portrait_message(
                                 API_KEY, json.dumps(agent1_data, indent=2),
+                                output_language=st.session_state.output_language,
                                 model=st.session_state.prefilter_model
                             )
                             st.error(agent3_text or "We only provide painting lessons for portraits.")
                             prefilter_passed = False
+                            elapsed = time.perf_counter() - time_start
+                            st.caption(f"⏱️ Total time: {elapsed:.1f}s")
 
                     if not prefilter_passed:
                         pass  # Already showed error, skip evaluation
@@ -1326,8 +1334,9 @@ with col_main:
                             "parsed_response": parsed_response
                         })
 
+                        elapsed = time.perf_counter() - time_start
                         st.success(
-                            f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')}")
+                            f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')} | ⏱️ Total time: {elapsed:.1f}s")
 
                         # Display result
                         st.divider()
