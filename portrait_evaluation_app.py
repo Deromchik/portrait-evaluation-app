@@ -665,121 +665,6 @@ Before finalizing your response, verify each of these points:
 **OUTPUT LANGUAGE:** All feedback text, progress_summary, and advanced_feedback must be written in {output_language}.
 """
 
-# Dynamic audience/complexity sections for Julia style feedback (by skill level)
-JULIA_LEVEL_BEGINNER = """
-AUDIENCE AND COMPLEXITY (Beginner):
-- The reader is a 12-14 year old girl or a complete beginner. Use very simple words and short sentences.
-- Avoid complex art terms and jargon entirely. If you must mention a technique, explain it in everyday words.
-- "Chew" any technical concept and explain everything as if to a child who has never drawn.
-- simple_advanced_feedback must be 100-200 tokens - keep it digestible for beginners.
-- Use very simple words and short sentences suitable for a 12-14 year old.
-- Strictly limit the response to 4-6 short sentences (divided into 2-3 short paragraphs). Focus on ONE main practical tip so she doesn't get overwhelmed.
-"""
-
-JULIA_LEVEL_HOBBYIST = """
-AUDIENCE AND COMPLEXITY (Hobbyist):
-- The reader is a teen or adult who draws for fun, with some experience but no formal training. Use accessible, conversational language.
-- You may use basic art terms (e.g., "shading", "proportions", "composition") with brief inline explanation when first introduced.
-- Explain more advanced concepts in plain language; avoid heavy jargon.
-- simple_advanced_feedback must be 200-350 tokens - balanced depth for someone building skills.
-- Use clear, friendly language that feels supportive without being condescending.
-"""
-
-JULIA_LEVEL_TRAINED = """
-AUDIENCE AND COMPLEXITY (Trained/Advanced):
-- The reader has formal training or significant practice. You may use professional art terminology (e.g., chiaroscuro, foreshortening, value relationships).
-- Provide deeper technical analysis and reference established techniques or artists when relevant.
-- Balance encouragement with precise, actionable critique suitable for someone refining their craft.
-- simple_advanced_feedback must be 250-400 tokens - allow for more nuanced, detailed feedback.
-- Use precise vocabulary while keeping Julia's warm, encouraging tone.
-"""
-
-JULIA_LEVEL_CONTENT = {
-    "beginner": JULIA_LEVEL_BEGINNER,
-    "hobbyist": JULIA_LEVEL_HOBBYIST,
-    "trained/advanced": JULIA_LEVEL_TRAINED,
-}
-
-JULIA_STYLE_PROMPT = """
-Task:
-You will receive a JSON object in this variable:
-
-{input_data}
-
-Your task:
-1. Convert each "feedback" text into a SHORT, friendly "brief_feedback" line in Julia's communication style.
-2. Convert each "advanced_feedback" text into a friendly "simple_advanced_feedback" WITHOUT RESIZING in Julia's communication style.
-
-{audience_complexity}
-
-EMOJI AND FORMAT RULES (apply to all levels):
-- The brief_feedback MUST include 1-3 emoji characters, placed naturally inside the text (not all at the very end).
-- Do NOT add an emoji-only tail like " ... <three emojis>".
-- Spread them: put 1 emoji near the compliment and (if you use a second) near the tip, as part of the sentence.
-- Do not put more than 1 emoji in a row.
-- You are FORBIDDEN from using phrases like "What do you think about such experiments?", "This could be very interesting!" at the end of statements.
-
-OUTPUT RULES:
-- For each category, output an object with TWO fields: "brief_feedback" and "simple_advanced_feedback".
-- Keep the SAME category keys and same order.
-- Do NOT add or remove categories.
-- Do NOT add new facts that were not in the input.
-- Output ONLY the final JSON. No explanations and no code fences.
-
-OUTPUT FORMAT:
-{{
-    "Composition and Design": {{
-        "brief_feedback": "<SHORT friendly feedback with 1-3 emojis>",
-        "simple_advanced_feedback": "<Detailed feedback, token length per audience_complexity rules>"
-    }},
-    "Proportions and Anatomy": {{
-        "brief_feedback": "<SHORT friendly feedback with 1-3 emojis>",
-        "simple_advanced_feedback": "<Detailed feedback, token length per audience_complexity rules>"
-    }},
-    ... (continue for all categories)
-}}
-
-
-SIMPLE_ADVANCED_FEEDBACK RULES (CRITICAL):
-- **simple_advanced_feedback is created based on advanced_feedback from the provided data. Always add comments from advanced_feedback at the beginning of simple_advanced_feedback about the current state of the portrait, such as "You've significantly improved the level of detail in your portrait, especially in the hair and facial features", "You've refined the anatomy, especially around the jawline and ear, which makes the portrait look more realistic", and so on.**
-- Token length for simple_advanced_feedback is defined in the AUDIENCE AND COMPLEXITY section above - follow it strictly.
-- simple_advanced_feedback should provide completely new insights, different examples, or alternative perspectives that complement but do not duplicate the feedback.
-- The "simple_advanced_feedback" field MUST NEVER repeat any information, phrases, or concepts already stated in the "brief_feedback" field.
-- simple_advanced_feedback should provide completely new ideas, different examples, or alternative perspectives that complement but do not duplicate brief_feedback while referring to specific parts of the portrait (e.g., "left eye," "shading on the nose," "background on the right side").
-- **FORMATTING (CRITICAL):** The simple_advanced_feedback MUST use markdown or HTML formatting with line breaks for readability:
-  - Use `<br>` to separate paragraphs and key points
-  - Break text into short, digestible chunks (2-3 sentences each)
-  - Use bullet points or numbered lists where appropriate (e.g., `- point 1<br>- point 2`)
-  - Do NOT output one long unbroken block of text
-  - Don't make big double indents, only single ones
-  - Always use the `<br>` character for separation
-- **EMOJI REQUIREMENT:** Include 2-4 emojis naturally throughout simple_advanced_feedback text (not just at the end)
-
-
-Julia's style:
-- Start feedback with genuine emotional reactions and a friendly tone using phrases like 'Oh my god', 'wow that's amazing', or 'you did so well' to simulate an immediate, enthusiastic response.
-- Start suggestions with gentle phrases like "maybe you could" or "what would you think about" instead of direct commands
-- Use 'I think' to soften statements.
-- Avoid overly formal or pompous language - keep it conversational and accessible
-- Avoid forced corporate jargon like 'amp up', but allow light internet/Gen Z slang to sound natural.
-- Prefer "which gives it a super polished look" over shorter, less enthusiastic phrasing
-- Avoid starting sentences with -ing forms like "paying closer" - use "maybe you could pay attention to" instead
-- Use frequent intensifiers like "so", "super", and "really" to match her high-energy vlogger persona (e.g., "so excited", "super cute")
-- Incorporate natural conversational fillers like "like", "just", "I mean", and "but yeah" to make the text feel spontaneously spoken rather than rigidly scripted
-- Include light self-deprecation or mention shared artistic struggles (e.g., "I know how hard this is", "I struggle with this too") to sound like a supportive peer instead of an authority figure
-- Focus on practical, actionable advice rather than abstract concepts
-- Respect individual differences (like natural facial asymmetry) rather than treating them as flaws
-- Give specific technical suggestions (highlight placement, color layering, shading techniques)
-- Keep the core technical feedback concise and practical.
-- Consider the artist's intent (like realism goals) when giving suggestions about creative elements
-- Match vocabulary and technical depth to the audience level defined in AUDIENCE AND COMPLEXITY above
-- Balance positive reinforcement with specific improvement suggestions
-
-Now, write the feedback JSON in Julia's style and return only the updated JSON.
-**Important: Language of all output values must be in:**
-{output_language}
-"""
-
 # Initialize session state
 if "iterations" not in st.session_state:
     st.session_state.iterations = []
@@ -795,12 +680,6 @@ if "standalone_model" not in st.session_state:
 
 if "comparison_model" not in st.session_state:
     st.session_state.comparison_model = "openai/gpt-5.2"
-
-if "julia_model" not in st.session_state:
-    st.session_state.julia_model = "openai/gpt-5.2"
-
-if "julia_skill_level" not in st.session_state:
-    st.session_state.julia_skill_level = "beginner"
 
 
 # API key from Streamlit secrets
@@ -849,7 +728,7 @@ def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt
         }
     ]
 
-    # Optionally add user message (not used for Julia-style prompt where everything is in system)
+    # Optionally add user message
     if user_content is not None:
         messages.append({"role": "user", "content": user_content})
 
@@ -977,51 +856,6 @@ def get_score_class(score):
     return "score-low"
 
 
-def build_julia_input_data(parsed_response):
-    """Build input data for Julia style prompt from parsed evaluation response.
-    Extracts only categories that have feedback and advanced_feedback."""
-    if not parsed_response:
-        return None
-    categories_input = {}
-    for k, v in parsed_response.items():
-        if k == "progress_summary":
-            continue
-        if isinstance(v, dict) and "feedback" in v and "advanced_feedback" in v:
-            categories_input[k] = {
-                "feedback": v.get("feedback", ""),
-                "advanced_feedback": v.get("advanced_feedback", "")
-            }
-    return categories_input if categories_input else None
-
-
-def call_julia_style_api(api_key, parsed_response, output_language, skill_level="beginner", model="openai/gpt-5.2"):
-    """Calls API to convert evaluation feedback to Julia's style.
-
-    Returns:
-        tuple: (response_text, usage, system_prompt) or (None, {}, None) if no input data.
-    """
-    input_data = build_julia_input_data(parsed_response)
-    if not input_data:
-        return None, {}, None
-
-    input_json = json.dumps(input_data, indent=2, ensure_ascii=False)
-    audience_complexity = JULIA_LEVEL_CONTENT.get(skill_level, JULIA_LEVEL_BEGINNER)
-    system_prompt = JULIA_STYLE_PROMPT.format(
-        input_data=input_json,
-        audience_complexity=audience_complexity,
-        output_language=output_language
-    )
-    # For JULIA_STYLE_PROMPT everything (instructions + data) is in the system message.
-    # No separate user message is sent.
-    response_text, usage = call_openai_api(
-        api_key,
-        system_prompt,
-        user_content=None,
-        model=model,
-    )
-    return response_text, usage, system_prompt
-
-
 def get_export_data(iterations):
     """Prepares data for export (without images)"""
     export_list = []
@@ -1033,8 +867,6 @@ def get_export_data(iterations):
             "evaluation": iteration.get("evaluation"),
             "parsed_response": iteration.get("parsed_response"),
             "raw_response": iteration.get("raw_response"),
-            "julia_response": iteration.get("julia_response"),
-            "julia_skill_level": iteration.get("julia_skill_level")
         }
         export_list.append(export_item)
     return export_list
@@ -1100,12 +932,6 @@ def get_full_logs(iterations):
                 "system_prompt": actual_system_prompt,
                 "user_content": user_content_log
             },
-            # Julia-style API call info (if available)
-            "julia_api_input": {
-                "model": iteration.get("julia_model"),
-                "system_prompt": iteration.get("julia_system_prompt"),
-                "skill_level": iteration.get("julia_skill_level"),
-            } if iteration.get("julia_system_prompt") else None,
             "api_output": {
                 "raw_response": iteration.get("raw_response"),
                 "parsed_response": iteration.get("parsed_response"),
@@ -1164,40 +990,6 @@ def display_evaluation(evaluation, is_comparison=False, parsed_response=None, ra
     if raw_response:
         with st.expander("📄 View Raw JSON Response", expanded=False):
             st.code(raw_response, language="json")
-
-
-def display_julia_feedback(julia_response, show_header=True):
-    """Displays Julia style feedback in a separate block."""
-    if not julia_response:
-        return
-    parsed = parse_evaluation_response(julia_response)
-    if not parsed:
-        st.warning("Could not parse Julia style feedback")
-        return
-    if show_header:
-        st.markdown("### ✨ Julia's Style Feedback")
-        st.caption("Friendly feedback adapted for a 12-14 year old audience")
-    cols = st.columns(2)
-    for i, (category, data) in enumerate(parsed.items()):
-        if not isinstance(data, dict):
-            continue
-        brief = data.get("brief_feedback", "")
-        simple_adv = data.get("simple_advanced_feedback", "")
-        if not brief and not simple_adv:
-            continue
-        with cols[i % 2]:
-            with st.expander(f"**{category}**", expanded=False):
-                if brief:
-                    st.markdown("**brief_feedback:**")
-                    st.markdown(brief)
-                if simple_adv:
-                    st.markdown("**simple_advanced_feedback:**")
-                    st.markdown(simple_adv, unsafe_allow_html=True)
-
-    # Full response in a code block so user can copy it entirely (Streamlit code block has copy button)
-    with st.expander("📋 Copy full Julia response", expanded=False):
-        st.caption("Use the copy icon on the top-right of the code block to copy the entire response.")
-        st.code(julia_response, language="json")
 
 
 # === MAIN INTERFACE ===
@@ -1269,7 +1061,7 @@ with col_main:
         "meta-llama/llama-3.1-405b-instruct"
     ]
 
-    col_model1, col_model2, col_model3 = st.columns(3)
+    col_model1, col_model2 = st.columns(2)
     
     with col_model1:
         selected_standalone_model = st.selectbox(
@@ -1288,15 +1080,6 @@ with col_main:
             help="Select the model for comparison evaluations"
         )
         st.session_state.comparison_model = selected_comparison_model
-
-    with col_model3:
-        selected_julia_model = st.selectbox(
-            "Model for Julia Style",
-            options=model_options,
-            index=model_options.index(st.session_state.julia_model) if st.session_state.julia_model in model_options else 0,
-            help="Select the model for Julia-style feedback conversion"
-        )
-        st.session_state.julia_model = selected_julia_model
 
     st.divider()
 
@@ -1318,16 +1101,6 @@ with col_main:
         help="Select the language for evaluation feedback"
     )
     st.session_state.output_language = selected_language
-
-    # Julia skill level (affects feedback complexity)
-    skill_level_options = ["beginner", "hobbyist", "trained/advanced"]
-    selected_skill_level = st.selectbox(
-        "Julia Style: Skill Level",
-        options=skill_level_options,
-        index=skill_level_options.index(st.session_state.julia_skill_level) if st.session_state.julia_skill_level in skill_level_options else 0,
-        help="Beginner: very simple words, 12-14 yo audience. Hobbyist: accessible with some art terms. Trained/Advanced: professional terminology, deeper analysis."
-    )
-    st.session_state.julia_skill_level = selected_skill_level
 
     st.divider()
 
@@ -1424,36 +1197,12 @@ with col_main:
                     st.success(
                         f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')}")
 
-                    # Julia style conversion (always runs on evaluation result)
-                    julia_response = None
-                    if parsed_response and build_julia_input_data(parsed_response):
-                        with st.spinner("Converting to Julia's style..."):
-                            try:
-                                julia_response, julia_usage, julia_system_prompt = call_julia_style_api(
-                                    API_KEY,
-                                    parsed_response,
-                                    st.session_state.output_language,
-                                    skill_level=st.session_state.julia_skill_level,
-                                    model=st.session_state.julia_model
-                                )
-                                st.session_state.iterations[-1]["julia_response"] = julia_response
-                                st.session_state.iterations[-1]["julia_skill_level"] = st.session_state.julia_skill_level
-                                st.session_state.iterations[-1]["julia_system_prompt"] = julia_system_prompt
-                                st.session_state.iterations[-1]["julia_model"] = st.session_state.julia_model
-                            except Exception as julia_err:
-                                st.warning(f"Julia style conversion skipped: {julia_err}")
-
                     # Display result
                     st.divider()
                     st.subheader(
                         f"📝 Evaluation Result (Iteration {len(st.session_state.iterations)})")
                     display_evaluation(
                         standard_eval, is_comparison, parsed_response, response_text)
-
-                    # Display Julia style feedback in separate block
-                    if julia_response:
-                        st.divider()
-                        display_julia_feedback(julia_response)
 
                 except requests.exceptions.RequestException as e:
                     st.session_state.iterations.pop()  # Remove failed iteration
@@ -1480,11 +1229,6 @@ with col_history:
                     for cat, data in iteration["evaluation"].items():
                         if isinstance(data, dict) and "score" in data:
                             st.write(f"• {cat}: **{data['score']}**/10")
-
-                # Julia style feedback for each iteration
-                if iteration.get("julia_response"):
-                    with st.expander("✨ Julia's Style Feedback", expanded=False):
-                        display_julia_feedback(iteration.get("julia_response"), show_header=False)
 
                 # Raw JSON view button for each iteration
                 if iteration.get("raw_response"):
