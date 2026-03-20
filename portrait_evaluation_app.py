@@ -201,6 +201,34 @@ Important:
 - Always express suggestions as concrete, small actions (e.g., "make this darker", "soften this edge", "add a small highlight"), not abstract advice
 """
 
+# Audience complexity levels (affects feedback vocabulary and depth)
+AUDIENCE_COMPLEXITY_BEGINNER = """AUDIENCE AND COMPLEXITY (Beginner):
+- The reader is a 12-14 year old girl or a complete beginner. Use very simple words and short sentences.
+- Avoid complex art terms and jargon entirely. If you must mention a technique, explain it in everyday words.
+- "Chew" any technical concept and explain everything as if to a child who has never drawn.
+- advanced_feedback must be 150-250 tokens - keep it digestible for beginners.
+- Use very simple words and short sentences suitable for a 12-14 year old."""
+
+AUDIENCE_COMPLEXITY_HOBBYIST = """AUDIENCE AND COMPLEXITY (Hobbyist):
+- The reader is a teen or adult who draws for fun, with some experience but no formal training. Use accessible, conversational language.
+- You may use basic art terms (e.g., "shading", "proportions", "composition") with brief inline explanation when first introduced.
+- Explain more advanced concepts in plain language; avoid heavy jargon.
+- advanced_feedback must be 200-350 tokens - balanced depth for someone building skills.
+- Use clear, friendly language that feels supportive without being condescending."""
+
+AUDIENCE_COMPLEXITY_TRAINED = """AUDIENCE AND COMPLEXITY (Trained/Advanced):
+- The reader has formal training or significant practice. You may use professional art terminology (e.g., chiaroscuro, foreshortening, value relationships).
+- Provide deeper technical analysis and reference established techniques or artists when relevant.
+- Balance encouragement with precise, actionable critique suitable for someone refining their craft.
+- advanced_feedback must be 250-400 tokens - allow for more nuanced, detailed feedback.
+- Use precise vocabulary while keeping Julia's warm, encouraging tone."""
+
+AUDIENCE_COMPLEXITY = {
+    "beginner": AUDIENCE_COMPLEXITY_BEGINNER,
+    "hobbyist": AUDIENCE_COMPLEXITY_HOBBYIST,
+    "trained/advanced": AUDIENCE_COMPLEXITY_TRAINED,
+}
+
 # Prompts - Main evaluation
 EVALUATE_PORTRAIT_STANDALONE = """
 You are provided with an image of a student's portrait painting. Your task is to thoroughly analyze the student's painting based on several artistic criteria.
@@ -344,6 +372,9 @@ A portrait that would receive a score of 0/10 represents the absolute minimum ba
    Each score must reflect precise evaluation with maximum decimal variety across all categories.
 5. **LOW SCORE CRITERIA:** If the portrait is truly poorly drawn (lack of shadows, lack of details, primitive elements, continuous lines), you MUST give low scores (1.0-3.9).
 
+### AUDIENCE AND COMPLEXITY:
+{audience_complexity}
+
 {julia_style_rules}
 
 ### INTERNAL GENERATION ORDER (CRITICAL):
@@ -467,11 +498,12 @@ Your task is to:
 Besides positive feedback it is also important to give constructive criticism to the student.
 
 ### OUTPUT STYLE (VERY IMPORTANT):
-- The reader is a 12-14 year old girl. Use simple words and short sentences.
 - Keep each category's feedback brief: 1-2 short sentences max.
 - Keep `progress_summary` texts short and friendly too (also include emojis).
-- `advanced_feedback` MUST also use simple words suitable for a 12-14 year old girl.
-- Never use complex terminology without explaining it in simple words.
+- Never use complex terminology without explaining it in simple words (or use appropriate level per audience).
+
+### AUDIENCE AND COMPLEXITY:
+{audience_complexity}
 
 {julia_style_rules}
 
@@ -556,6 +588,7 @@ If comparing a basic sketch (iteration 1) to a refined portrait (current iterati
 
 ### 5. Honest Assessment:
 - If the current portrait is objectively WORSE than the previous one, say so clearly and lower the score
+- **CRITICAL (REGRESSION):** When the current portrait is worse than the previous one, your `feedback` and `advanced_feedback` MUST explicitly describe WHAT has worsened (e.g., "the proportions feel less accurate than before", "the shading has become flatter", "the details in the eyes are less refined"). Do NOT just say "it declined" or "quality dropped" — name the specific aspects that regressed so the student knows what to fix.
 - Do not inflate scores to avoid hurting feelings - honest feedback helps the student improve
 - If there are no visible changes, be specific about what remains unchanged
 - If changes made the work worse, explain why and how to fix it
@@ -813,6 +846,9 @@ if "chat_history" not in st.session_state:
 
 if "output_language" not in st.session_state:
     st.session_state.output_language = "English"
+
+if "skill_level" not in st.session_state:
+    st.session_state.skill_level = "beginner"
 
 if "standalone_model" not in st.session_state:
     st.session_state.standalone_model = "openai/gpt-5.2"
@@ -1288,6 +1324,16 @@ with col_main:
     )
     st.session_state.output_language = selected_language
 
+    # Skill level (audience complexity)
+    skill_level_options = ["beginner", "hobbyist", "trained/advanced"]
+    selected_skill_level = st.selectbox(
+        "Skill Level (Audience)",
+        options=skill_level_options,
+        index=skill_level_options.index(st.session_state.skill_level) if st.session_state.skill_level in skill_level_options else 0,
+        help="Beginner: very simple words, 12-14 yo. Hobbyist: accessible with some art terms. Trained/Advanced: professional terminology, deeper analysis."
+    )
+    st.session_state.skill_level = selected_skill_level
+
     st.divider()
 
     st.header("📤 Upload Portrait")
@@ -1370,6 +1416,7 @@ with col_main:
                                 comparison_data)
                             system_prompt = COMPARISON_PROMPT.format(
                                 julia_style_rules=JULIA_STYLE_RULES,
+                                audience_complexity=AUDIENCE_COMPLEXITY.get(st.session_state.skill_level, AUDIENCE_COMPLEXITY_BEGINNER),
                                 output_language=st.session_state.output_language
                             )
                             selected_model = st.session_state.comparison_model
@@ -1381,6 +1428,7 @@ with col_main:
                             system_prompt = EVALUATE_PORTRAIT_STANDALONE.format(
                                 reference_context="",  # Empty by default, can be customized if needed
                                 julia_style_rules=JULIA_STYLE_RULES,
+                                audience_complexity=AUDIENCE_COMPLEXITY.get(st.session_state.skill_level, AUDIENCE_COMPLEXITY_BEGINNER),
                                 output_language=st.session_state.output_language
                             )
                             selected_model = st.session_state.standalone_model
