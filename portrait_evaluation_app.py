@@ -84,7 +84,59 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Prompts
+# Prompts - Pre-filter agents (agent1, agent2, agent3)
+AGENT1_INITIAL_ANALYSIS = """### Task:
+You are provided with an image from a painting student. Your task is to analyze the uploaded image and classify its contents. Based on your analysis, return a JSON-formatted output containing the following variables:
+
+### Output Format:
+The output should be a JSON object with the following structure:
+{{
+    "OBJECT_ON_IMAGE": "<String>",
+    "IS_PORTRAIT": <Bool>,
+    "CENCORED_CONTENT": <Bool>,
+    "PAINTING_OR_DRAWING_OR_ELSE": "<String>",
+    "DRAWING_STYLE": "<String>"
+}}
+
+### Variables:
+1. **OBJECT_ON_IMAGE**: A string describing the objects visible on the image.
+2. **IS_PORTRAIT**: A Boolean value indicating whether the image contains a portrait.
+   - Return `True` if the image contains a portrait (i.e., focuses on a person's face or upper body).
+   - Return `False` if the image does not contains a portrait.
+3. **CENCORED_CONTENT**: A Boolean value indicating whether the image contains censored content.
+   - Return `True` if the image includes censored content such as nudity, explicit material, or other sensitive elements.
+   - Return `False` if the image does not contain censored content.
+4. **PAINTING_OR_DRAWING_OR_ELSE**: A string indicating the type of the artwork.
+   - Return `"Painting"` if the image is of a painting (i.e., an artwork created using paints, such as oil, acrylic, or watercolor).
+   - Return `"Drawing"` if the image is of a drawing (i.e., an artwork created using dry media like pencils, charcoal, or ink).
+   - Return `"Manga"` if the image is of a manga style drawing or painting.
+   - Return `"Cartoon"` if the image is of a cartoon style drawing or painting.
+   - Return `"Else"` if the image is neither a painting nor a drawing.
+5. **DRAWING_STYLE**: A string indicating the style of the drawing.
+
+### Rules:
+- Always provide concise and accurate descriptions for the "OBJECT_ON_IMAGE".
+- Ensure the Boolean values for "IS_PORTRAIT" and "CENCORED_CONTENT" are accurate based on the image content.
+- Correctly classify the image type in "PAINTING_OR_DRAWING_OR_ELSE" according to the visual cues.
+- Carefully examine the input image to ensure the accuracy of the output format in JSON.
+- If unsure about any classification, use your best judgment based on the image content.
+"""
+AGENT2_CENSORED_MESSAGE = """### Task:
+You were provided with an image from a painting student. Your task was to analyze the image and classify its contents. Based on your analysis, you have found that the image has censored content.
+This was your output:
+{input_data}
+
+Your task is to write a message in english explaining that this censored content is not allowed. Maximum amount of characters is 300.
+"""
+AGENT3_NOT_PORTRAIT_MESSAGE = """### Task:
+You were provided with an image from a painting student. Your task was to analyze the image and classify its contents. Based on your analysis, you have found that the image does not contain a portrait.
+This was your output:
+{input_data}
+
+Your task is to write a message in english explaining that at the moment you only provide painting lessons for portraits. Maximum amount of characters is 300.
+"""
+
+# Prompts - Main evaluation
 EVALUATE_PORTRAIT_STANDALONE = """
 You are provided with an image of a student's portrait painting. Your task is to thoroughly analyze the student's painting based on several artistic criteria.
 
@@ -681,6 +733,10 @@ if "standalone_model" not in st.session_state:
 if "comparison_model" not in st.session_state:
     st.session_state.comparison_model = "openai/gpt-5.2"
 
+# Pre-filter agents (agent1, agent2, agent3) - fast/cheap model for classification tasks
+if "prefilter_model" not in st.session_state:
+    st.session_state.prefilter_model = "openai/gpt-4o-mini"
+
 
 # API key from Streamlit secrets
 API_KEY = st.secrets["OPENAI_API_KEY"]
@@ -706,6 +762,39 @@ def get_comparison_data(iterations):
         return {"first": iterations[0], "previous": None, "current": iterations[1]}
     else:
         return {"first": iterations[0], "previous": iterations[n-2], "current": iterations[n-1]}
+
+
+def call_agent1_initial_analysis(api_key, image_base64, model="openai/gpt-4o-mini"):
+    """Agent1: Initial image analysis - classifies portrait, censored, etc. Takes image as input."""
+    user_content = [
+        {"type": "text", "text": "Analyze this image and return the classification JSON."},
+        {"type": "image_url", "image_url": {"url": image_base64, "detail": "low"}}
+    ]
+    return call_openai_api(api_key, AGENT1_INITIAL_ANALYSIS, user_content, model=model)
+
+
+def call_agent2_censored_message(api_key, agent1_output_json, model="openai/gpt-4o-mini"):
+    """Agent2: Generates censored content rejection message. Text-only input."""
+    prompt = AGENT2_CENSORED_MESSAGE.format(input_data=agent1_output_json)
+    return call_openai_api(api_key, prompt, user_content="Generate the rejection message.", model=model)
+
+
+def call_agent3_not_portrait_message(api_key, agent1_output_json, model="openai/gpt-4o-mini"):
+    """Agent3: Generates not-portrait rejection message. Text-only input."""
+    prompt = AGENT3_NOT_PORTRAIT_MESSAGE.format(input_data=agent1_output_json)
+    return call_openai_api(api_key, prompt, user_content="Generate the rejection message.", model=model)
+
+
+def parse_agent1_response(response_text):
+    """Parse agent1 JSON response. Returns dict or None."""
+    try:
+        start_idx = response_text.find('{')
+        end_idx = response_text.rfind('}') + 1
+        if start_idx != -1 and end_idx > start_idx:
+            return json.loads(response_text[start_idx:end_idx])
+    except json.JSONDecodeError:
+        pass
+    return None
 
 
 def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt-5.2"):
@@ -1054,6 +1143,8 @@ with col_main:
     model_options = [
         "openai/gpt-5.2",
         "openai/gpt-4o",
+        "openai/gpt-4o-mini",
+        "openai/gpt-4.1-nano",
         "openai/gpt-4-turbo",
         "anthropic/claude-3.5-sonnet",
         "anthropic/claude-3-opus",
@@ -1080,6 +1171,16 @@ with col_main:
             help="Select the model for comparison evaluations"
         )
         st.session_state.comparison_model = selected_comparison_model
+
+    # Pre-filter model (agent1, agent2, agent3) - fast/cheap for classification
+    prefilter_options = ["openai/gpt-4o-mini", "openai/gpt-4.1-nano", "openai/gpt-4o", "openai/gpt-5.2"]
+    selected_prefilter = st.selectbox(
+        "Model for Image Check (agent1/2/3)",
+        options=prefilter_options,
+        index=prefilter_options.index(st.session_state.prefilter_model) if st.session_state.prefilter_model in prefilter_options else 0,
+        help="Fast model for initial image classification (portrait/censored check). Default: gpt-4o-mini"
+    )
+    st.session_state.prefilter_model = selected_prefilter
 
     st.divider()
 
@@ -1119,96 +1220,129 @@ with col_main:
         if st.button("🚀 Get Evaluation", type="primary"):
             with st.spinner("Analyzing portrait..."):
                 try:
+                    iteration_added = False
                     # Encode image
                     image_base64 = encode_image_to_base64(uploaded_file)
 
-                    # Add new iteration (without evaluation yet)
-                    new_iteration = {
-                        "image_base64": image_base64,
-                        "image_name": uploaded_file.name,
-                        "timestamp": datetime.now().isoformat(),
-                        "evaluation": None
-                    }
-                    st.session_state.iterations.append(new_iteration)
-
-                    # Determine mode
-                    is_comparison = len(st.session_state.iterations) > 1
-
-                    if is_comparison:
-                        # Comparison mode
-                        st.info(
-                            f"📊 Comparison mode: iteration {len(st.session_state.iterations)}")
-                        comparison_data = get_comparison_data(
-                            st.session_state.iterations)
-                        user_content = build_comparison_content(
-                            comparison_data)
-                        system_prompt = COMPARISON_PROMPT.format(
-                            output_language=st.session_state.output_language
+                    # Agent1: Initial analysis (first gate - image classification)
+                    with st.spinner("Checking image..."):
+                        agent1_text, _ = call_agent1_initial_analysis(
+                            API_KEY, image_base64,
+                            model=st.session_state.prefilter_model
                         )
-                        selected_model = st.session_state.comparison_model
+                    agent1_data = parse_agent1_response(agent1_text)
+                    prefilter_passed = True
+
+                    if agent1_data:
+                        # Agent2: Censored content → reject
+                        if agent1_data.get("CENCORED_CONTENT") is True:
+                            agent2_text, _ = call_agent2_censored_message(
+                                API_KEY, json.dumps(agent1_data, indent=2),
+                                model=st.session_state.prefilter_model
+                            )
+                            st.error(agent2_text or "This content is not allowed.")
+                            prefilter_passed = False
+
+                        # Agent3: Not a portrait → reject
+                        elif agent1_data.get("IS_PORTRAIT") is False:
+                            agent3_text, _ = call_agent3_not_portrait_message(
+                                API_KEY, json.dumps(agent1_data, indent=2),
+                                model=st.session_state.prefilter_model
+                            )
+                            st.error(agent3_text or "We only provide painting lessons for portraits.")
+                            prefilter_passed = False
+
+                    if not prefilter_passed:
+                        pass  # Already showed error, skip evaluation
                     else:
-                        # First evaluation
-                        st.info("🎨 First portrait evaluation")
-                        user_content = build_standalone_content(
-                            image_base64)
-                        system_prompt = EVALUATE_PORTRAIT_STANDALONE.format(
-                            reference_context="",  # Empty by default, can be customized if needed
-                            output_language=st.session_state.output_language
+                        # Add new iteration (without evaluation yet)
+                        new_iteration = {
+                            "image_base64": image_base64,
+                            "image_name": uploaded_file.name,
+                            "timestamp": datetime.now().isoformat(),
+                            "evaluation": None
+                        }
+                        st.session_state.iterations.append(new_iteration)
+                        iteration_added = True
+
+                        # Determine mode
+                        is_comparison = len(st.session_state.iterations) > 1
+
+                        if is_comparison:
+                            # Comparison mode
+                            st.info(
+                                f"📊 Comparison mode: iteration {len(st.session_state.iterations)}")
+                            comparison_data = get_comparison_data(
+                                st.session_state.iterations)
+                            user_content = build_comparison_content(
+                                comparison_data)
+                            system_prompt = COMPARISON_PROMPT.format(
+                                output_language=st.session_state.output_language
+                            )
+                            selected_model = st.session_state.comparison_model
+                        else:
+                            # First evaluation
+                            st.info("🎨 First portrait evaluation")
+                            user_content = build_standalone_content(
+                                image_base64)
+                            system_prompt = EVALUATE_PORTRAIT_STANDALONE.format(
+                                reference_context="",  # Empty by default, can be customized if needed
+                                output_language=st.session_state.output_language
+                            )
+                            selected_model = st.session_state.standalone_model
+
+                        # API call
+                        response_text, usage = call_openai_api(
+                            API_KEY,
+                            system_prompt,
+                            user_content,
+                            model=selected_model
                         )
-                        selected_model = st.session_state.standalone_model
 
-                    # API call
-                    response_text, usage = call_openai_api(
-                        API_KEY,
-                        system_prompt,
-                        user_content,
-                        model=selected_model
-                    )
+                        # Parse response
+                        parsed_response = parse_evaluation_response(
+                            response_text, is_comparison)
+                        standard_eval = extract_standard_evaluation(
+                            parsed_response, is_comparison)
 
-                    # Parse response
-                    parsed_response = parse_evaluation_response(
-                        response_text, is_comparison)
-                    standard_eval = extract_standard_evaluation(
-                        parsed_response, is_comparison)
+                        # Save evaluation
+                        st.session_state.iterations[-1]["evaluation"] = standard_eval
+                        st.session_state.iterations[-1]["raw_response"] = response_text
+                        st.session_state.iterations[-1]["parsed_response"] = parsed_response
+                        st.session_state.iterations[-1]["system_prompt"] = system_prompt
+                        st.session_state.iterations[-1]["model"] = selected_model
 
-                    # Save evaluation
-                    st.session_state.iterations[-1]["evaluation"] = standard_eval
-                    st.session_state.iterations[-1]["raw_response"] = response_text
-                    st.session_state.iterations[-1]["parsed_response"] = parsed_response
-                    # Save actual prompt with substituted variables
-                    st.session_state.iterations[-1]["system_prompt"] = system_prompt
-                    # Save model used
-                    st.session_state.iterations[-1]["model"] = selected_model
+                        # Add to chat history
+                        st.session_state.chat_history.append({
+                            "role": "user",
+                            "content": f"Uploaded: {uploaded_file.name}",
+                            "image": image_base64
+                        })
+                        st.session_state.chat_history.append({
+                            "role": "assistant",
+                            "content": response_text,
+                            "evaluation": standard_eval,
+                            "is_comparison": is_comparison,
+                            "parsed_response": parsed_response
+                        })
 
-                    # Add to chat history
-                    st.session_state.chat_history.append({
-                        "role": "user",
-                        "content": f"Uploaded: {uploaded_file.name}",
-                        "image": image_base64
-                    })
-                    st.session_state.chat_history.append({
-                        "role": "assistant",
-                        "content": response_text,
-                        "evaluation": standard_eval,
-                        "is_comparison": is_comparison,
-                        "parsed_response": parsed_response
-                    })
+                        st.success(
+                            f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')}")
 
-                    st.success(
-                        f"✅ Evaluation received! Tokens used: {usage.get('total_tokens', 'N/A')}")
-
-                    # Display result
-                    st.divider()
-                    st.subheader(
-                        f"📝 Evaluation Result (Iteration {len(st.session_state.iterations)})")
-                    display_evaluation(
-                        standard_eval, is_comparison, parsed_response, response_text)
+                        # Display result
+                        st.divider()
+                        st.subheader(
+                            f"📝 Evaluation Result (Iteration {len(st.session_state.iterations)})")
+                        display_evaluation(
+                            standard_eval, is_comparison, parsed_response, response_text)
 
                 except requests.exceptions.RequestException as e:
-                    st.session_state.iterations.pop()  # Remove failed iteration
+                    if iteration_added:
+                        st.session_state.iterations.pop()  # Remove failed iteration
                     st.error(f"API Error: {e}")
                 except Exception as e:
-                    st.session_state.iterations.pop()
+                    if iteration_added:
+                        st.session_state.iterations.pop()
                     st.error(f"Error: {e}")
 
 with col_history:
