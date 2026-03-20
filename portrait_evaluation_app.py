@@ -1140,17 +1140,15 @@ col_main, col_history = st.columns([2, 1])
 with col_main:
     st.header("⚙️ Settings")
 
-    # Model selection for each prompt type
+    # Model selection for evaluation prompts (vision-capable, fast)
     model_options = [
         "openai/gpt-5.2",
         "openai/gpt-4o",
         "openai/gpt-4o-mini",
-        "openai/gpt-4.1-nano",
-        "openai/gpt-4-turbo",
-        "anthropic/claude-3.5-sonnet",
-        "anthropic/claude-3-opus",
-        "google/gemini-pro-1.5",
-        "meta-llama/llama-3.1-405b-instruct"
+        "google/gemini-2.0-flash-001",
+        "google/gemini-2.5-flash",
+        "google/gemini-2.5-flash-lite",
+        "google/gemini-3-flash-preview",
     ]
 
     col_model1, col_model2 = st.columns(2)
