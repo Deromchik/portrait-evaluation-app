@@ -898,13 +898,15 @@ def call_agent1_initial_analysis(api_key, image_base64, model="openai/gpt-4o-min
 
 def call_agent2_censored_message(api_key, agent1_output_json, output_language="English", model="openai/gpt-4o-mini"):
     """Agent2: Generates censored content rejection message. Text-only input."""
-    prompt = AGENT2_CENSORED_MESSAGE.format(input_data=agent1_output_json, output_language=output_language)
+    prompt = AGENT2_CENSORED_MESSAGE.format(
+        input_data=agent1_output_json, output_language=output_language)
     return call_openai_api(api_key, prompt, user_content="Generate the rejection message.", model=model)
 
 
 def call_agent3_not_portrait_message(api_key, agent1_output_json, output_language="English", model="openai/gpt-4o-mini"):
     """Agent3: Generates not-portrait rejection message. Text-only input."""
-    prompt = AGENT3_NOT_PORTRAIT_MESSAGE.format(input_data=agent1_output_json, output_language=output_language)
+    prompt = AGENT3_NOT_PORTRAIT_MESSAGE.format(
+        input_data=agent1_output_json, output_language=output_language)
     return call_openai_api(api_key, prompt, user_content="Generate the rejection message.", model=model)
 
 
@@ -1129,7 +1131,7 @@ def get_full_logs(iterations):
 
         # Get model used for this iteration
         model_used = iteration.get("model", "openai/gpt-5.2")
-        
+
         iteration_log = {
             "iteration_number": i + 1,
             "timestamp": iteration.get("timestamp", "N/A"),
@@ -1265,40 +1267,51 @@ with col_main:
     # Model selection for evaluation prompts (vision-capable, fast)
     model_options = [
         "openai/gpt-5.2",
-        "openai/gpt-4o",
         "openai/gpt-4o-mini",
-        "google/gemini-2.0-flash-001",
-        "google/gemini-2.5-flash",
-        "google/gemini-2.5-flash-lite",
-        "google/gemini-3-flash-preview",
+        "openai/gpt-oss-120b",
+        "openai/gpt-5.4-nano",
+        "anthropic/claude-3.5-haiku",
+        "openai/gpt-5.4-mini",
+        "xiaomi/mimo-v2-omni",
+        "mistralai/mistral-small-2603",
+        "google/gemini-3.1-flash-lite-preview",
+        "google/gemini-3.1-flash-image-preview",
+        "qwen/qwen3.5-35b-a3b",
+        "moonshotai/kimi-k2.5",
+        "bytedance-seed/seed-1.6-flash",
+        "bytedance-seed/seed-1.6",
     ]
 
     col_model1, col_model2 = st.columns(2)
-    
+
     with col_model1:
         selected_standalone_model = st.selectbox(
             "Model for Standalone Evaluation",
             options=model_options,
-            index=model_options.index(st.session_state.standalone_model) if st.session_state.standalone_model in model_options else 0,
+            index=model_options.index(
+                st.session_state.standalone_model) if st.session_state.standalone_model in model_options else 0,
             help="Select the model for first portrait evaluation"
         )
         st.session_state.standalone_model = selected_standalone_model
-    
+
     with col_model2:
         selected_comparison_model = st.selectbox(
             "Model for Comparison Evaluation",
             options=model_options,
-            index=model_options.index(st.session_state.comparison_model) if st.session_state.comparison_model in model_options else 0,
+            index=model_options.index(
+                st.session_state.comparison_model) if st.session_state.comparison_model in model_options else 0,
             help="Select the model for comparison evaluations"
         )
         st.session_state.comparison_model = selected_comparison_model
 
     # Pre-filter model (agent1, agent2, agent3) - fast/cheap for classification
-    prefilter_options = ["openai/gpt-4o-mini", "openai/gpt-4.1-nano", "openai/gpt-4o", "openai/gpt-5.2"]
+    prefilter_options = ["openai/gpt-4o-mini",
+                         "openai/gpt-4.1-nano", "openai/gpt-4o", "openai/gpt-5.2"]
     selected_prefilter = st.selectbox(
         "Model for Image Check (agent1/2/3)",
         options=prefilter_options,
-        index=prefilter_options.index(st.session_state.prefilter_model) if st.session_state.prefilter_model in prefilter_options else 0,
+        index=prefilter_options.index(
+            st.session_state.prefilter_model) if st.session_state.prefilter_model in prefilter_options else 0,
         help="Fast model for initial image classification (portrait/censored check). Default: gpt-4o-mini"
     )
     st.session_state.prefilter_model = selected_prefilter
@@ -1329,7 +1342,8 @@ with col_main:
     selected_skill_level = st.selectbox(
         "Skill Level (Audience)",
         options=skill_level_options,
-        index=skill_level_options.index(st.session_state.skill_level) if st.session_state.skill_level in skill_level_options else 0,
+        index=skill_level_options.index(
+            st.session_state.skill_level) if st.session_state.skill_level in skill_level_options else 0,
         help="Beginner: very simple words, 12-14 yo. Hobbyist: accessible with some art terms. Trained/Advanced: professional terminology, deeper analysis."
     )
     st.session_state.skill_level = selected_skill_level
@@ -1373,7 +1387,8 @@ with col_main:
                                 output_language=st.session_state.output_language,
                                 model=st.session_state.prefilter_model
                             )
-                            st.error(agent2_text or "This content is not allowed.")
+                            st.error(
+                                agent2_text or "This content is not allowed.")
                             prefilter_passed = False
                             elapsed = time.perf_counter() - time_start
                             st.caption(f"⏱️ Total time: {elapsed:.1f}s")
@@ -1385,7 +1400,8 @@ with col_main:
                                 output_language=st.session_state.output_language,
                                 model=st.session_state.prefilter_model
                             )
-                            st.error(agent3_text or "We only provide painting lessons for portraits.")
+                            st.error(
+                                agent3_text or "We only provide painting lessons for portraits.")
                             prefilter_passed = False
                             elapsed = time.perf_counter() - time_start
                             st.caption(f"⏱️ Total time: {elapsed:.1f}s")
@@ -1416,7 +1432,8 @@ with col_main:
                                 comparison_data)
                             system_prompt = COMPARISON_PROMPT.format(
                                 julia_style_rules=JULIA_STYLE_RULES,
-                                audience_complexity=AUDIENCE_COMPLEXITY.get(st.session_state.skill_level, AUDIENCE_COMPLEXITY_BEGINNER),
+                                audience_complexity=AUDIENCE_COMPLEXITY.get(
+                                    st.session_state.skill_level, AUDIENCE_COMPLEXITY_BEGINNER),
                                 output_language=st.session_state.output_language
                             )
                             selected_model = st.session_state.comparison_model
@@ -1428,7 +1445,8 @@ with col_main:
                             system_prompt = EVALUATE_PORTRAIT_STANDALONE.format(
                                 reference_context="",  # Empty by default, can be customized if needed
                                 julia_style_rules=JULIA_STYLE_RULES,
-                                audience_complexity=AUDIENCE_COMPLEXITY.get(st.session_state.skill_level, AUDIENCE_COMPLEXITY_BEGINNER),
+                                audience_complexity=AUDIENCE_COMPLEXITY.get(
+                                    st.session_state.skill_level, AUDIENCE_COMPLEXITY_BEGINNER),
                                 output_language=st.session_state.output_language
                             )
                             selected_model = st.session_state.standalone_model
