@@ -850,11 +850,16 @@ if "output_language" not in st.session_state:
 if "skill_level" not in st.session_state:
     st.session_state.skill_level = "beginner"
 
+if "reasoning_effort" not in st.session_state:
+    # OpenRouter reasoning effort for GPT-5 models (reasoning: {effort: ...})
+    # Default is "none" to avoid extra latency/cost unless the user picks otherwise.
+    st.session_state.reasoning_effort = "none"
+
 if "standalone_model" not in st.session_state:
-    st.session_state.standalone_model = "openai/gpt-5.2"
+    st.session_state.standalone_model = "openai/gpt-5.4-nano"
 
 if "comparison_model" not in st.session_state:
-    st.session_state.comparison_model = "openai/gpt-5.2"
+    st.session_state.comparison_model = "openai/gpt-5.4-nano"
 
 # Pre-filter agents (agent1, agent2, agent3) - fast/cheap model for classification tasks
 if "prefilter_model" not in st.session_state:
@@ -953,9 +958,9 @@ def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt
         "max_tokens": 6000
     }
 
-    # Add reasoning_effort for openai/gpt-5.2 to enable temperature parameter
-    if model == "openai/gpt-5.2":
-        data["reasoning_effort"] = "none"
+    # Optionally control reasoning effort (OpenRouter uses `reasoning: {effort: ...}`)
+    if model.startswith("openai/gpt-5") and "reasoning_effort" in st.session_state:
+        data["reasoning"] = {"effort": st.session_state.reasoning_effort}
 
     response = requests.post(url, headers=headers, json=data)
     response.raise_for_status()
@@ -1268,18 +1273,13 @@ with col_main:
     model_options = [
         "openai/gpt-5.2",
         "openai/gpt-4o-mini",
-        "openai/gpt-oss-120b",
         "openai/gpt-5.4-nano",
-        "anthropic/claude-3.5-haiku",
         "openai/gpt-5.4-mini",
         "xiaomi/mimo-v2-omni",
         "mistralai/mistral-small-2603",
         "google/gemini-3.1-flash-lite-preview",
         "google/gemini-3.1-flash-image-preview",
         "qwen/qwen3.5-35b-a3b",
-        "moonshotai/kimi-k2.5",
-        "bytedance-seed/seed-1.6-flash",
-        "bytedance-seed/seed-1.6",
     ]
 
     col_model1, col_model2 = st.columns(2)
@@ -1315,6 +1315,19 @@ with col_main:
         help="Fast model for initial image classification (portrait/censored check). Default: gpt-4o-mini"
     )
     st.session_state.prefilter_model = selected_prefilter
+
+    st.divider()
+
+    # Reasoning effort (GPT-5 models only; OpenRouter normalizes this as `reasoning.effort`)
+    reasoning_effort_options = ["xhigh", "high", "medium", "low", "minimal", "none"]
+    selected_reasoning_effort = st.selectbox(
+        "Reasoning effort (GPT-5)",
+        options=reasoning_effort_options,
+        index=reasoning_effort_options.index(st.session_state.reasoning_effort)
+        if st.session_state.reasoning_effort in reasoning_effort_options else 0,
+        help="Controls how much effort GPT-5 models spend on reasoning. Higher can improve quality but may be slower/costlier."
+    )
+    st.session_state.reasoning_effort = selected_reasoning_effort
 
     st.divider()
 
