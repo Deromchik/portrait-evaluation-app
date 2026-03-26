@@ -927,7 +927,8 @@ def parse_agent1_response(response_text):
     return None
 
 
-def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt-5.2"):
+def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt-5.2",
+                      response_format=None):
     """Call OpenAI API (via OpenRouter)"""
     url = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -957,6 +958,9 @@ def call_openai_api(api_key, system_prompt, user_content=None, model="openai/gpt
         "temperature": 0.1,
         "max_tokens": 6000
     }
+
+    if response_format is not None:
+        data["response_format"] = response_format
 
     # Optionally control reasoning effort (OpenRouter uses `reasoning: {effort: ...}`)
     if model.startswith("openai/gpt-5") and "reasoning_effort" in st.session_state:
@@ -1469,7 +1473,8 @@ with col_main:
                             API_KEY,
                             system_prompt,
                             user_content,
-                            model=selected_model
+                            model=selected_model,
+                            response_format={"type": "json_object"},
                         )
 
                         # Parse response
