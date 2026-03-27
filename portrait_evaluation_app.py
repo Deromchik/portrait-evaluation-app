@@ -588,14 +588,10 @@ with col_main:
     # Model selection for evaluation prompts (vision-capable, fast)
     model_options = [
         "openai/gpt-5.2",
-        "openai/gpt-4o-mini",
-        "openai/gpt-5.4-nano",
-        "openai/gpt-5.4-mini",
-        "xiaomi/mimo-v2-omni",
-        "mistralai/mistral-small-2603",
-        "google/gemini-3.1-flash-lite-preview",
-        "google/gemini-3.1-flash-image-preview",
-        "qwen/qwen3.5-35b-a3b",
+        "x-ai/grok-4.20-multi-agent-beta",
+        "x-ai/grok-4.20-beta",
+        "openai/gpt-5.2-chat",
+        "anthropic/claude-haiku-4.5",
     ]
 
     col_model1, col_model2 = st.columns(2)
